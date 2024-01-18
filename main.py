@@ -212,7 +212,7 @@ def enviarArchivoCorreo():
     smtp = smtplib.SMTP_SSL("smtp.gmail.com")
 
     correo_emisor = "registroautomaticoactuaciones@gmail.com"
-    contraseña_emisor = "registroAutomatico123"
+    
 
     correo_receptor = "registroautomaticoactuaciones@gmail.com"
     asunto = "Registro escaneo de documento"
