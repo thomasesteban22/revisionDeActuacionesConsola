@@ -19,6 +19,10 @@ from email.mime.text import MIMEText
 import logging
 import openpyxl
 
+import tkinter as tk
+import tkinter.filedialog as filedialog
+from tkinter import ttk
+
 
 
 def guardadoDeLogs(fInicio, fFinal, numRegistrosEscaneados):
@@ -44,28 +48,21 @@ def recorrerElExcel():
 
     # Obtiene el número de filas de la hoja de trabajo
     n_filas = ws.max_row
-
-    # Blucle para testeos
-    """
-    fila = 2
-    while fila < n_filas:
-        valorw = ws['A' + str(fila)].value
-        numeroDeProcesow = valorw
-        revisarActuaciones(numeroDeProcesow)
-        fila = fila + 1
-    """
     # Inicio de lectura en bucle
     try:
         for fila in range(2, n_filas + 1):
             # Obtiene el valor de la celda A de la fila actual
-            valor = ws['A' + str(fila)].value
-            numeroDeProceso = valor
-            revisarActuaciones(numeroDeProceso)
+            valor = ws['D' + str(fila)].value
+            numeroDeProceso = valor     
             # Si el valor es None, pasa
             if valor is None or valor == "":
-                pass
-    except Exception as e:
-        print(e.args[0])
+                    pass
+            else:
+                revisarActuaciones(numeroDeProceso)
+        print("REGISTROS ESCANEADOS: " + fila + " DE: " + n_filas)
+    except:
+        pass
+       
 
 
 def revisarActuaciones(numeroDeProceso):
@@ -84,7 +81,6 @@ def revisarActuaciones(numeroDeProceso):
         driver.maximize_window()
         sleep(1)
     except:
-        driver.refresh()
         if driver.window_handles == []:
             print("Se Se detuvo el escaneo de registros manualmente")
         print("Error al cargar la pagina, posible fallo de internet")
@@ -95,7 +91,7 @@ def revisarActuaciones(numeroDeProceso):
     second_div_element.click()
 
 
-    element = WebDriverWait(driver, 10).until(
+    element = WebDriverWait(driver, 60).until(
         EC.presence_of_element_located((By.XPATH, "//input[@placeholder='Ingrese los 23 dígitos del número de Radicación']"))
     )
     sleep(1)
@@ -106,13 +102,13 @@ def revisarActuaciones(numeroDeProceso):
     print(numero_radicacion)
 
     # Hace click en el botón "Consultar"
-    span_consultar = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, "//span[text()='Consultar']")))
+    span_consultar = WebDriverWait(driver, 60).until(EC.presence_of_element_located((By.XPATH, "//span[text()='Consultar']")))
     sleep(1)
     # Haz click en el span "Consultar"
     span_consultar.click()
 
     try:
-        boton_volver = WebDriverWait(driver, 4).until(
+        boton_volver = WebDriverWait(driver, 10).until(
         EC.presence_of_element_located((By.XPATH, "//span[text()=' Volver ']"))
         )
 
@@ -121,14 +117,14 @@ def revisarActuaciones(numeroDeProceso):
         # Haz clic en el botón
             boton_volver.click()
     except:
-        driver.refresh()
-        pass
+       print("No hay span volver")
+       pass
 
     
     try:
-        tablas = WebDriverWait(driver, 10).until(
+        tablas = WebDriverWait(driver, 60).until(
         EC.presence_of_all_elements_located((By.TAG_NAME, "table"))
-    )
+        )
         resTablaFechaAC = tablas[0]
         for fila in resTablaFechaAC.find_elements(By.TAG_NAME, "tr"):
             driver.execute_script("arguments[0].style.backgroundColor = 'yellow';", fila)
@@ -138,70 +134,73 @@ def revisarActuaciones(numeroDeProceso):
                 sleep(1)
                 driver.execute_script("arguments[0].style.backgroundColor = 'red';", celdaFecha)
             
-                try:
-                    botonFecha = celdaFecha.find_element(By.TAG_NAME, "button")
-                    if(botonFecha is not None):
-                        driver.execute_script("arguments[0].style.backgroundColor = 'green';", botonFecha)
-                        print(botonFecha.text)
-                        fechaInicialComparar = date.fromisoformat(botonFecha.text)
-                        fechaInicialStr = fechaInicialComparar.strftime("%Y-%m-%d")
-                        for i in range(0, 100):
-                            fechaTemporalComprar = fechaHoy - timedelta(days=i)
-                            fechaTemporalComprar = fechaTemporalComprar.date()
-                            fechaTemporalComprar = fechaTemporalComprar.strftime("%Y-%m-%d")
-                            if(fechaInicialStr == fechaTemporalComprar):
-                                botonFecha.click()
-                                   # Espera a que las tablas se carguen
-                                tablas = WebDriverWait(driver, 10).until(
-                                    EC.presence_of_all_elements_located((By.TAG_NAME, "table"))
-                                )
-                                sleep(1)
-                                # Encuentra la tabla "ACTUACIONES"
-                                tabla_actuaciones = tablas[1]
+                botonFecha = celdaFecha.find_element(By.TAG_NAME, "button")
+                if(botonFecha is not None):
+                    driver.execute_script("arguments[0].style.backgroundColor = 'green';", botonFecha)
+                    print(botonFecha.text)
+                    fechaInicialComparar = date.fromisoformat(botonFecha.text)
+                    fechaInicialStr = fechaInicialComparar.strftime("%Y-%m-%d")
+                    for i in range(0, 100):
+                        fechaTemporalComprar = fechaHoy - timedelta(days=i)
+                        fechaTemporalComprar = fechaTemporalComprar.date()
+                        fechaTemporalComprar = fechaTemporalComprar.strftime("%Y-%m-%d")
+                        if(fechaInicialStr == fechaTemporalComprar):
+                            botonFecha.click()
+                            break
+    except:
+        print("Error en la busqueda de tabla")
+        pass
 
-                                # Itera sobre las filas de la tabla
-                                for fila in tabla_actuaciones.find_elements(By.TAG_NAME, "tr"):
+    
+    try:
+        # Espera a que las tablas se carguen
+        tablas = WebDriverWait(driver, 60).until(
+        EC.presence_of_all_elements_located((By.TAG_NAME, "table"))
+        )
+        sleep(1)
+        # Encuentra la tabla "ACTUACIONES"
+        tabla_actuaciones = tablas[1]
 
-                                    # Verifica que la lista no esté vacía
-                                    if len(fila.find_elements(By.TAG_NAME, "td")) > 0:
+        # Itera sobre las filas de la tabla
+        for fila in tabla_actuaciones.find_elements(By.TAG_NAME, "tr"):
 
-                                        # Obtiene el primer td de la fila
-                                        celdaFecha = fila.find_elements(By.TAG_NAME, "td")[0]
-                                        celdaActuacion = fila.find_elements(By.TAG_NAME, "td")[1]
-                                        celdaAnotacion = fila.find_elements(By.TAG_NAME, "td")[2]
-                                
-                                        # Subraya la celdaFecha en amarillo
-                                        driver.execute_script("arguments[0].style.backgroundColor = 'yellow';", celdaFecha)
-                                        fechaObtenida = date.fromisoformat(celdaFecha.text)
-                                        actuacionObtenida = celdaActuacion.text
-                                        anotacionObtenida = celdaAnotacion.text
-                                        fechaObtenida_str = fechaObtenida.strftime("%Y-%m-%d")
-                                        print(fechaObtenida_str, "OBTENIDA")
-                                        
-                                        for i in range(0, 100):
-                                            fecha_comparacion = fechaHoy - timedelta(days=i)
-                                            fecha_comparacion = fecha_comparacion.date()
-                                            fecha_comparacion = fecha_comparacion.strftime("%Y-%m-%d")
-                                            if fechaObtenida_str == fecha_comparacion:
-                                                    archivoActuaciones = open("informacion.txt", "a")
-                                                    print("FECHA COMPATIBLE ------------------------->")
-                                                    archivoActuaciones.write("\n")                                                                                                                                                  
-                                                    archivoActuaciones.write("NUMERO DEL PROCESO: " + numeroDeProceso + "\n")
-                                                    archivoActuaciones.write("Fecha: " + fechaObtenida_str + "\n")
-                                                    archivoActuaciones.write("Actuacion: " + actuacionObtenida + "\n")
-                                                    archivoActuaciones.write("Anotacion: " + anotacionObtenida + "\n")
-                                                    archivoActuaciones.write("-----------------------------------------------------------------"+ "\n")
-                                    else:
-                                        pass
-                                archivoActuaciones.close()
-                                driver.quit()
+            # Verifica que la lista no esté vacía
+            if len(fila.find_elements(By.TAG_NAME, "td")) > 0:
+
+                    # Obtiene el primer td de la fila
+                celdaFecha = fila.find_elements(By.TAG_NAME, "td")[0]
+                celdaActuacion = fila.find_elements(By.TAG_NAME, "td")[1]
+                celdaAnotacion = fila.find_elements(By.TAG_NAME, "td")[2]
+
+                    # Subraya la celdaFecha en amarillo
+                driver.execute_script("arguments[0].style.backgroundColor = 'yellow';", celdaFecha)
+                fechaObtenida = date.fromisoformat(celdaFecha.text)
+                actuacionObtenida = celdaActuacion.text
+                anotacionObtenida = celdaAnotacion.text
+                fechaObtenida_str = fechaObtenida.strftime("%Y-%m-%d")
+                print(fechaObtenida_str, "OBTENIDA")
+                    
+                for i in range(0, 100):
+                    fecha_comparacion = fechaHoy - timedelta(days=i)
+                    fecha_comparacion = fecha_comparacion.date()
+                    fecha_comparacion = fecha_comparacion.strftime("%Y-%m-%d")
+                    if fechaObtenida_str == fecha_comparacion:
+                            archivoActuaciones = open("informacion.txt", "a")
+                            print("FECHA COMPATIBLE ------------------------->")
+                            archivoActuaciones.write("\n")                                                                                                                                                  
+                            archivoActuaciones.write("NUMERO DEL PROCESO: " + numeroDeProceso + "\n")
+                            archivoActuaciones.write("Fecha: " + fechaObtenida_str + "\n")
+                            archivoActuaciones.write("Actuacion: " + actuacionObtenida + "\n")
+                            archivoActuaciones.write("Anotacion: " + anotacionObtenida + "\n")
+                            archivoActuaciones.write("-----------------------------------------------------------------"+ "\n")
                     else:
                         pass
-                        print("No hay botones")
-                except:
-                    print("Error en los tds")
+        archivoActuaciones.close()            
+        driver.quit()
     except:
-        print("Error en las tablas")
+        print("Error recorrido y guardado de informacion")
+        pass
+        
 
 def enviarArchivoCorreo():
     fecha_ahora = datetime.now()
@@ -245,18 +244,20 @@ def main():
         format="%(asctime)s %(levelname)s %(message)s",
         filename="registros.log",
     )
+ 
     try:
         recorrerElExcel()
-    except:
-        print("Se detuvo el escaneo de registros en excel")
+    except Exception as e:
         pass
-    """
+        print(e.args[0])
+        print("Se detuvo el recorrido de Excel")
+   
     try:
         enviarArchivoCorreo()
     except Exception as e:
         print(e.args[0])
         print("Error en el envio del correo")
-        """
+
 
 #Ejecuccion del programa
 main()
