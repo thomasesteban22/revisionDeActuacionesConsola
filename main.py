@@ -23,6 +23,7 @@ import tkinter as tk
 import tkinter.filedialog as filedialog
 from tkinter import ttk
 
+import termcolor
 
 
 def guardadoDeLogs(fInicio, fFinal, numRegistrosEscaneados):
@@ -59,10 +60,22 @@ def recorrerElExcel():
                     pass
             else:
                 revisarActuaciones(numeroDeProceso)
-        print("REGISTROS ESCANEADOS: " + fila + " DE: " + n_filas)
     except:
         pass
-       
+
+    archivoActuaciones = open("informacion.txt", "a")
+    archivoActuaciones.write("\n")
+
+    indiceFila = fila - 1
+
+    texto ="# " +"REGISTROS ESCANEADOS: " + str(indiceFila) + " DE: " + str(n_filas) + "\n"
+   
+    # Escribir el texto al archivo
+    archivoActuaciones.write("#####################################" + "\n")
+    archivoActuaciones.write(texto)
+    archivoActuaciones.write("#####################################" + "\n")
+    archivoActuaciones.close()
+
 
 
 def revisarActuaciones(numeroDeProceso):
@@ -108,7 +121,7 @@ def revisarActuaciones(numeroDeProceso):
     span_consultar.click()
 
     try:
-        boton_volver = WebDriverWait(driver, 10).until(
+        boton_volver = WebDriverWait(driver, 30).until(
         EC.presence_of_element_located((By.XPATH, "//span[text()=' Volver ']"))
         )
 
@@ -147,6 +160,10 @@ def revisarActuaciones(numeroDeProceso):
                         if(fechaInicialStr == fechaTemporalComprar):
                             botonFecha.click()
                             break
+                        else:
+                            pass
+                            #print("No hay fechas que coincidan")
+                    
     except:
         print("Error en la busqueda de tabla")
         pass
@@ -198,7 +215,7 @@ def revisarActuaciones(numeroDeProceso):
         archivoActuaciones.close()            
         driver.quit()
     except:
-        print("Error recorrido y guardado de informacion")
+        print("No se realizo la busqueda de actuaciones")
         pass
         
 
