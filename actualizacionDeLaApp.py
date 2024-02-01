@@ -1,3 +1,4 @@
+import os
 import requests
 import zipfile
 
@@ -8,23 +9,24 @@ def check_update():
     # Obtener la versión de la actualización disponible
     response = requests.get("https://api.github.com/repos/thomasesteban22/revisionDeActuacionesConsola/releases/latest").json()
     available_version = response.get("tag_name")
+
     # Si la versión disponible es superior a la versión actual, descargar la actualización
     if available_version is not None and available_version > current_version:
-        # Descargar la actualización
-        update_url = "https://github.com/thomasesteban22/revisionDeActuacionesConsola/releases/download/" + available_version + "/update.zip"
-        update_file = requests.get(update_url).content
+        # Descargar el archivo de actualización
+        update_url = "https://github.com/thomasesteban22/revisionDeActuacionesConsola/archive/refs/tags/" + available_version + ".zip"
 
-        # Verificar el tamaño del archivo de actualización
-        if len(update_file) == 0:
-            print("El archivo de actualización está vacío.")
+        # Verificar si el archivo de actualización existe
+        head_response = requests.head(update_url)
+        if head_response.status_code == 404:
+            print("El archivo de actualización no existe.")
             return
 
+        # Guardar el archivo de actualización en el disco como un archivo binario
+        with open("update.zip", "wb") as f:
+            f.write(requests.get(update_url).content)
 
-        # Descomprimir la actualización
+        # Try to unzip the update file
         try:
-            with open("update.zip", "wb") as f:
-                f.write(update_file)
-
             with zipfile.ZipFile("update.zip", "r") as zip_ref:
                 zip_ref.extractall()
         except Exception as e:
@@ -35,7 +37,11 @@ def check_update():
         print("¿Desea instalar la actualización? (s/n)")
         answer = input()
         if answer == "s":
-            with zipfile.ZipFile("update.zip", "r") as zip_ref:
-                zip_ref.extractall()
+            # Reemplazar el código actual por el código nuevo
+            filename = os.path.basename("revisionDeActuacionesSinInterfaz")
+            if os.path.exists(filename):
+                os.rename(filename, "revisionDeActuacionesConsola-1.1.0")
+            else:
+                print("El archivo 'revisionDeActuacionesConsola' no existe.")
     else:
         print("No hay actualizaciones disponibles.")

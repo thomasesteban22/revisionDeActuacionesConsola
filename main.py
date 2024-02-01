@@ -38,8 +38,6 @@ def check_internet():
         return False
 
 
-diasDeBusqueda = int(input("¿Cuántos días quiere escanear?\n"))
-
 def reporteDeErrores(mensaje):
     fechaHoy = obtenerFechaDeHoy
     fechaHoyStr = str(fechaHoy)
@@ -68,7 +66,7 @@ def recorrerElExcel():
         # Abre el archivo Excel
         wb = openpyxl.load_workbook("FOLDERESBASENUEVA.xlsm")
         # Obtiene la hoja de trabajo activa
-        ws = wb.get_sheet_by_name("CONSULTA UNIFICADA DE PROCESOS")
+        ws = wb["CONSULTA UNIFICADA DE PROCESOS"]
     except:
         mensaje = "Hubo un fallo en el Excel, revisar Excel"
         reporteDeErrores(mensaje)
@@ -110,6 +108,7 @@ def recorrerElExcel():
 
 
 def revisarActuaciones(numeroDeProceso):
+    diasDeBusqueda = int(input("¿Cuántos días quiere escanear?\n"))
     print(numeroDeProceso)
     #Obtiene la fecha de hoy
     fechaHoy = obtenerFechaDeHoy()
