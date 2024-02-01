@@ -21,9 +21,32 @@ import openpyxl
 
 import tkinter as tk
 import tkinter.filedialog as filedialog
-from tkinter import ttk
 
-import termcolor
+import time
+import schedule
+
+import actualizacionDeLaApp
+
+
+import requests
+
+def check_internet():
+    try:
+        requests.get("https://consultaprocesos.ramajudicial.gov.co/Procesos/NumeroRadicacion", timeout=10)  # Agregué un tiempo de espera de 5 segundos
+        return True
+    except (requests.ConnectionError, requests.Timeout) as exception:
+        return False
+
+
+diasDeBusqueda = int(input("¿Cuántos días quiere escanear?\n"))
+
+def reporteDeErrores(mensaje):
+    fechaHoy = obtenerFechaDeHoy
+    fechaHoyStr = str(fechaHoy)
+    archivoReporteErrores = open("reporteDeErrores.txt", "a")
+    archivoReporteErrores.write("\n") 
+    archivoReporteErrores.write("FECHA: ", fechaHoyStr, " ERROR: ", mensaje)
+    archivoReporteErrores.write("\n") 
 
 
 def guardadoDeLogs(fInicio, fFinal, numRegistrosEscaneados):
@@ -36,30 +59,38 @@ def obtenerFechaDeHoy():
         fechaHoy = datetime.now()
         return fechaHoy
     except:
+        mensaje = "Hubo un fallo en el internet"
+        reporteDeErrores(mensaje)
         print("Error obteniendo la fecha de hoy, posible fallo de internet")
 
 def recorrerElExcel():
     try:
         # Abre el archivo Excel
-        wb = openpyxl.load_workbook("testBaseDeDatos.xlsx")
+        wb = openpyxl.load_workbook("FOLDERESBASENUEVA.xlsm")
         # Obtiene la hoja de trabajo activa
-        ws = wb.active
+        ws = wb.get_sheet_by_name("CONSULTA UNIFICADA DE PROCESOS")
     except:
+        mensaje = "Hubo un fallo en el Excel, revisar Excel"
+        reporteDeErrores(mensaje)
         print("Error abriendo el excel, verificar ruta y nombre del archivo")
 
     # Obtiene el número de filas de la hoja de trabajo
     n_filas = ws.max_row
+    fila = 2
     # Inicio de lectura en bucle
     try:
-        for fila in range(2, n_filas + 1):
-            # Obtiene el valor de la celda A de la fila actual
-            valor = ws['D' + str(fila)].value
-            numeroDeProceso = valor     
-            # Si el valor es None, pasa
-            if valor is None or valor == "":
-                    pass
-            else:
-                revisarActuaciones(numeroDeProceso)
+        while fila < n_filas:
+            for fila in range(2, n_filas + 1):
+                # Obtiene el valor de la celda A de la fila actual
+                valor = ws['B' + str(fila)].value
+                numeroDeProceso = valor     
+                # Si el valor es None, pasa
+                if valor is None or valor == "":
+                        pass
+                else:
+                    revisarActuaciones(numeroDeProceso)
+            fila = fila + 1
+            print("Numero de proceso: " + str(fila) + " de "+ str(n_filas))
     except:
         pass
 
@@ -88,40 +119,78 @@ def revisarActuaciones(numeroDeProceso):
     # Abre el navegador
     driver = webdriver.Edge(options=options)
 
+
+    
     try:
-        # Abre la página web
-        driver.get("https://consultaprocesos.ramajudicial.gov.co/Procesos/NumeroRadicacion")
-        driver.maximize_window()
-        sleep(1)
+        while True:
+            if check_internet():
+                try:
+                    driver.get("https://consultaprocesos.ramajudicial.gov.co/Procesos/NumeroRadicacion")
+                    driver.maximize_window()
+
+                    # Espera hasta que se cargue la página
+                    while driver.title != "Consulta de Procesos por Número de Radicación- Consejo Superior de la Judicatura":
+                        sleep(5)
+                        driver.get("https://consultaprocesos.ramajudicial.gov.co/Procesos/NumeroRadicacion")
+                        driver.maximize_window()
+
+                    break  # Sal del bucle si la página se cargó correctamente
+
+                except Exception as e:
+                    print(f"Error al cargar la página: {e}")
+
+            else:
+                print("No hay conexión a internet. Reintentamos en 30 segundos...")
+                sleep(30)
     except:
+        mensaje = "No se pudo acceder a la pagina de la rama, fallo de internet o mantenimiento"
+        reporteDeErrores(mensaje)
+        driver.refresh()
         if driver.window_handles == []:
             print("Se Se detuvo el escaneo de registros manualmente")
         print("Error al cargar la pagina, posible fallo de internet")
 
-        # Encuentra el elemento que deseas hacer clic
-    div_elements = driver.find_elements(By.CSS_SELECTOR, "div.v-input--selection-controls__input")
-    second_div_element = div_elements[2]
-    second_div_element.click()
-
-
-    element = WebDriverWait(driver, 60).until(
-        EC.presence_of_element_located((By.XPATH, "//input[@placeholder='Ingrese los 23 dígitos del número de Radicación']"))
-    )
-    sleep(1)
-    # Escribe el número de radicación en el elemento
-    element.send_keys(numeroDeProceso)
-    # Obtiene el texto del input
-    numero_radicacion = element.text
-    print(numero_radicacion)
-
-    # Hace click en el botón "Consultar"
-    span_consultar = WebDriverWait(driver, 60).until(EC.presence_of_element_located((By.XPATH, "//span[text()='Consultar']")))
-    sleep(1)
-    # Haz click en el span "Consultar"
-    span_consultar.click()
+    
+            
 
     try:
-        boton_volver = WebDriverWait(driver, 30).until(
+        div_elements = driver.find_elements(By.CSS_SELECTOR, "div.v-input--selection-controls__input")
+        second_div_element = div_elements[2]
+        second_div_element.click()
+    except:
+        mensaje = "No se pudo obtener el select Todos los procesos"
+        #reporteDeErrores(mensaje)
+        print("Error obteniendo la seleccion de todos los procesos")
+
+
+    try:    
+        element = WebDriverWait(driver, 60).until(
+            EC.presence_of_element_located((By.XPATH, "//input[@placeholder='Ingrese los 23 dígitos del número de Radicación']"))
+        )
+        # Escribe el número de radicación en el elemento
+        element.send_keys(numeroDeProceso)
+        # Obtiene el texto del input
+        numero_radicacion = element.text
+        print(numero_radicacion)
+    except:
+        mensaje = "No se pudo obtener el input de 23 digitos"
+        #reporteDeErrores(mensaje)
+        print("error en el input de los 23 digitos")
+
+
+    try:
+        # Hace click en el botón "Consultar"
+        span_consultar = WebDriverWait(driver, 60).until(EC.presence_of_element_located((By.XPATH, "//span[text()='Consultar']")))
+        sleep(1)
+        # Haz click en el span "Consultar"
+        span_consultar.click()
+    except:
+        mensaje = "No se pudo obtener el span consultar"
+        #reporteDeErrores(mensaje)
+        print("Error en el boton consultar")
+
+    try:
+        boton_volver = WebDriverWait(driver, 10).until(
         EC.presence_of_element_located((By.XPATH, "//span[text()=' Volver ']"))
         )
 
@@ -133,18 +202,15 @@ def revisarActuaciones(numeroDeProceso):
        print("No hay span volver")
        pass
 
-    
     try:
-        tablas = WebDriverWait(driver, 60).until(
+        tablas = WebDriverWait(driver, 40).until(
         EC.presence_of_all_elements_located((By.TAG_NAME, "table"))
         )
         resTablaFechaAC = tablas[0]
         for fila in resTablaFechaAC.find_elements(By.TAG_NAME, "tr"):
             driver.execute_script("arguments[0].style.backgroundColor = 'yellow';", fila)
-            sleep(1)
             if len(fila.find_elements(By.TAG_NAME, "td")) > 0:
                 celdaFecha = fila.find_elements(By.TAG_NAME, "td")[2]
-                sleep(1)
                 driver.execute_script("arguments[0].style.backgroundColor = 'red';", celdaFecha)
             
                 botonFecha = celdaFecha.find_element(By.TAG_NAME, "button")
@@ -153,7 +219,7 @@ def revisarActuaciones(numeroDeProceso):
                     print(botonFecha.text)
                     fechaInicialComparar = date.fromisoformat(botonFecha.text)
                     fechaInicialStr = fechaInicialComparar.strftime("%Y-%m-%d")
-                    for i in range(0, 100):
+                    for i in range(0, diasDeBusqueda):
                         fechaTemporalComprar = fechaHoy - timedelta(days=i)
                         fechaTemporalComprar = fechaTemporalComprar.date()
                         fechaTemporalComprar = fechaTemporalComprar.strftime("%Y-%m-%d")
@@ -165,6 +231,8 @@ def revisarActuaciones(numeroDeProceso):
                             #print("No hay fechas que coincidan")
                     
     except:
+        mensaje = "No se pudo obtener la tabla con las ultimas actuaciones"
+        #reporteDeErrores(mensaje)
         print("Error en la busqueda de tabla")
         pass
 
@@ -174,7 +242,6 @@ def revisarActuaciones(numeroDeProceso):
         tablas = WebDriverWait(driver, 60).until(
         EC.presence_of_all_elements_located((By.TAG_NAME, "table"))
         )
-        sleep(1)
         # Encuentra la tabla "ACTUACIONES"
         tabla_actuaciones = tablas[1]
 
@@ -197,7 +264,7 @@ def revisarActuaciones(numeroDeProceso):
                 fechaObtenida_str = fechaObtenida.strftime("%Y-%m-%d")
                 print(fechaObtenida_str, "OBTENIDA")
                     
-                for i in range(0, 100):
+                for i in range(0, diasDeBusqueda):
                     fecha_comparacion = fechaHoy - timedelta(days=i)
                     fecha_comparacion = fecha_comparacion.date()
                     fecha_comparacion = fecha_comparacion.strftime("%Y-%m-%d")
@@ -209,7 +276,7 @@ def revisarActuaciones(numeroDeProceso):
                             archivoActuaciones.write("Fecha: " + fechaObtenida_str + "\n")
                             archivoActuaciones.write("Actuacion: " + actuacionObtenida + "\n")
                             archivoActuaciones.write("Anotacion: " + anotacionObtenida + "\n")
-                            archivoActuaciones.write("-----------------------------------------------------------------"+ "\n")
+                            archivoActuaciones.write("---------------------------------------------------------------------------------------------------------------------------"+ "\n")
                     else:
                         pass
         archivoActuaciones.close()            
@@ -256,25 +323,29 @@ def enviarArchivoCorreo():
     smtp.quit()
     
 def main():
+    schedule.every(1).second.do(actualizacionDeLaApp.check_update)
+    while True: 
+        schedule.run_pending()
+        break
+
     logging.basicConfig(
-        level=logging.INFO,
-        format="%(asctime)s %(levelname)s %(message)s",
-        filename="registros.log",
+    level=logging.INFO,
+    format="%(asctime)s %(levelname)s %(message)s",
+    filename="registros.log",
     )
- 
     try:
         recorrerElExcel()
     except Exception as e:
         pass
         print(e.args[0])
         print("Se detuvo el recorrido de Excel")
-   
+
     try:
         enviarArchivoCorreo()
     except Exception as e:
+        mensaje = "No se envio el correo, fallo de internet"
+        #reporteDeErrores(mensaje)
         print(e.args[0])
         print("Error en el envio del correo")
 
-
-#Ejecuccion del programa
 main()
