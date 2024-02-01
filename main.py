@@ -323,10 +323,8 @@ def enviarArchivoCorreo():
     smtp.quit()
     
 def main():
-    schedule.every(1).second.do(actualizacionDeLaApp.check_update)
-    while True: 
-        schedule.run_pending()
-        break
+    # Revisar actualizaciones
+    actualizacionDeLaApp.check_update()
 
     logging.basicConfig(
     level=logging.INFO,
