@@ -7,7 +7,7 @@ def check_update():
     # Obtener la versión actual de la aplicación
     with open("version.txt", "r") as f:
         versionActual = f.read().strip()
-    print(versionActual)
+    print("Version Actual: " + versionActual)
 
     # Obtener la versión de la actualización disponible
     response = requests.get("https://api.github.com/repos/thomasesteban22/revisionDeActuacionesConsola/releases/latest").json()
@@ -15,6 +15,7 @@ def check_update():
 
     # Si la versión disponible es superior a la versión actual, descargar la actualización
     if available_version is not None and available_version > versionActual:
+        print("Version Disponible: " + available_version)
         # Descargar el archivo de actualización
         with open("versionAnterior.txt", 'w') as versionAnteriorTxt:
             versionAnteriorTxt.write(versionActual)
