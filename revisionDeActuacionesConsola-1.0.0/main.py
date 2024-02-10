@@ -63,9 +63,8 @@ def recorrerElExcel():
         # Abre el archivo Excel
         wb = openpyxl.load_workbook("FOLDERESBASENUEVA.xlsm")
         # Obtiene la hoja de trabajo activa
-        ws = wb.get_sheet_by_name("CONSULTA UNIFICADA DE PROCESOS")
+        ws = (wb["CONSULTA UNIFICADA DE PROCESOS"])
     except:
-        mensaje = "Hubo un fallo en el Excel, revisar Excel"
         #reporteDeErrores(mensaje)
         print("Error abriendo el excel, verificar ruta y nombre del archivo")
 

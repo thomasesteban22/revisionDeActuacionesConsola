@@ -51,7 +51,6 @@ def check_update():
             # Reemplazar el código actual por el código nuevo
             filename = os.path.basename("revisionDeActuacionesConsola-"+versionAnterior)
             if os.path.exists(filename):
-                #os.remove("revisionDeActuacionesConsola-"+versionAnterior)
                 shutil.rmtree("revisionDeActuacionesConsola-"+versionAnterior)
                 os.remove("update.zip")
             else:
