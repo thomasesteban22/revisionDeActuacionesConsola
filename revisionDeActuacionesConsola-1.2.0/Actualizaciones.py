@@ -53,6 +53,7 @@ def check_update():
                 #os.remove("revisionDeActuacionesConsola-"+versionAnterior)
                 shutil.rmtree("revisionDeActuacionesConsola-"+versionAnterior)
                 os.remove("update.zip")
+                os.replace(filename, "revisionDeActuacionesConsola-"+versionActual)
             else:
                 print("El archivo 'revisionActuacionesSinInterfaz' no existe.")
     else:
