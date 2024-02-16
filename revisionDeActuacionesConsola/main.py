@@ -3,12 +3,13 @@ import subprocess
 import os
 
 def main():
-    
+
     with open("revisionDeActuacionesConsola/version.txt", "r") as f:
         versionActual = f.read().strip()
     versionActualStr = str(versionActual) 
     print(versionActualStr)
     try:
+        print("a")
         check_update()
     except:
         print("Error en la actualizacion")
