@@ -31,12 +31,13 @@ def check_update():
             return
 
         # Guardar el archivo de actualización en el disco como un archivo binario
-        with open("update.zip", "wb") as f:
+        with open("revisionDeActuacionesConsola/update.zip", "wb") as f:
             f.write(requests.get(update_url).content)
+
 
         # Try to unzip the update file
         try:
-            with zipfile.ZipFile("update.zip", "r") as zip_ref:
+            with zipfile.ZipFile("revisionDeActuacionesConsola/update.zip", "r") as zip_ref:
                 zip_ref.extractall()
         except Exception as e:
             print("Error al descargar o descomprimir la actualización:", e)
@@ -51,13 +52,15 @@ def check_update():
             # Reemplazar el código actual por el código nuevo
             filename = os.path.basename("revisionDeActuacionesConsola")
             if os.path.exists(filename):
-                shutil.rmtree("revisionDeActuacionesConsola")
-                os.remove("update.zip")
-                rutaPrincipal = os.getcwd()
-                root = os.path.join(rutaPrincipal)
-        
-                ruta_origen = "revisionDeActuaciones/revisionDeActuacionesConsola-" + str(available_version)
-                shutil.move(ruta_origen, root)
+                try:
+                    shutil.rmtree("revisionDeActuacionesConsola/src")
+                    dirActualizacion = "revisionDeActuacionesConsola-"+str(available_version)+"/revisionDeActuacionesConsola/src"
+                    dirRoot = "revisionDeActuacionesConsola/src"
+                    shutil.move(dirActualizacion, dirRoot)
+                    os.remove("revisionDeActuacionesConsola/update.zip")
+                    shutil.rmtree("revisionDeActuacionesConsola-"+ str(available_version))
+                except:
+                    print("error moviendo")
             else:
                 print("El archivo 'revisionActuacionesSinInterfaz' no existe.")
     else:
