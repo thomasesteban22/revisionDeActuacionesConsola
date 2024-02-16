@@ -56,18 +56,18 @@ def obtenerFechaDeHoy():
         return fechaHoy
     except:
         mensaje = "Hubo un fallo en el internet"
-        reporteDeErrores(mensaje)
+        #reporteDeErrores(mensaje)
         print("Error obteniendo la fecha de hoy, posible fallo de internet")
 
 def recorrerElExcel():
     try:
         # Abre el archivo Excel
-        wb = openpyxl.load_workbook("FOLDERESBASENUEVA.xlsm")
+        wb = openpyxl.load_workbook("revisionDeActuacionesConsola/src/FOLDERESBASENUEVA.xlsm")
         # Obtiene la hoja de trabajo activa
         ws = (wb["CONSULTA UNIFICADA DE PROCESOS"])
     except:
         mensaje = "Hubo un fallo en el Excel, revisar Excel"
-        reporteDeErrores(mensaje)
+        #reporteDeErrores(mensaje)
         print("Error abriendo el excel, verificar ruta y nombre del archivo")
 
     # Obtiene el número de filas de la hoja de trabajo
@@ -140,7 +140,7 @@ def revisarActuaciones(numeroDeProceso):
                 sleep(30)
     except:
         mensaje = "No se pudo acceder a la pagina de la rama, fallo de internet o mantenimiento"
-        reporteDeErrores(mensaje)
+        #reporteDeErrores(mensaje)
         driver.refresh()
         if driver.window_handles == []:
             print("Se Se detuvo el escaneo de registros manualmente")

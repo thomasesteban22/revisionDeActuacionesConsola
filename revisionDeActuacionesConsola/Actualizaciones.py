@@ -5,7 +5,7 @@ import shutil
 
 def check_update():
     # Obtener la versión actual de la aplicación
-    with open("version.txt", "r") as f:
+    with open("revisionDeActuacionesConsola/version.txt", "r") as f:
         versionActual = f.read().strip()
     print("Version Actual: " + versionActual)
 
@@ -17,10 +17,10 @@ def check_update():
     if available_version is not None and available_version > versionActual:
         print("Version Disponible: " + available_version)
         # Descargar el archivo de actualización
-        with open("versionAnterior.txt", 'w') as versionAnteriorTxt:
+        with open("revisionDeActuacionesConsola/versionAnterior.txt", 'w') as versionAnteriorTxt:
             versionAnteriorTxt.write(versionActual)
 
-        with open("version.txt", 'w') as versionTxt:
+        with open("revisionDeActuacionesConsola/version.txt", 'w') as versionTxt:
             versionTxt.write(str(available_version))
         update_url = "https://github.com/thomasesteban22/revisionDeActuacionesConsola/archive/refs/tags/" + available_version + ".zip"
 
@@ -46,12 +46,12 @@ def check_update():
         print("¿Desea instalar la actualización? (s/n)")
         answer = input()
         if answer == "s":
-            with open("versionAnterior.txt", "r") as f:
+            with open("revisionDeActuacionesConsola/versionAnterior.txt", "r") as f:
                 versionAnterior = f.read().strip()
             # Reemplazar el código actual por el código nuevo
-            filename = os.path.basename("revisionDeActuacionesConsola-"+versionAnterior)
+            filename = os.path.basename("revisionDeActuacionesConsola")
             if os.path.exists(filename):
-                shutil.rmtree("revisionDeActuacionesConsola-"+versionAnterior)
+                shutil.rmtree("revisionDeActuacionesConsola")
                 os.remove("update.zip")
             else:
                 print("El archivo 'revisionActuacionesSinInterfaz' no existe.")
