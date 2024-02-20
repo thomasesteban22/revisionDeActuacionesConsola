@@ -19,9 +19,6 @@ from email.mime.text import MIMEText
 import logging
 import openpyxl
 
-import tkinter as tk
-import tkinter.filedialog as filedialog
-
 
 
 import requests
@@ -90,7 +87,7 @@ def recorrerElExcel():
     except:
         pass
 
-    archivoActuaciones = open("informacion.txt", "a")
+    archivoActuaciones = open("revisionDeActuacionesConsola/data/informacion.txt", "a")
     archivoActuaciones.write("\n")
 
     indiceFila = fila - 1
@@ -265,7 +262,7 @@ def revisarActuaciones(numeroDeProceso):
                     fecha_comparacion = fecha_comparacion.date()
                     fecha_comparacion = fecha_comparacion.strftime("%Y-%m-%d")
                     if fechaObtenida_str == fecha_comparacion:
-                            archivoActuaciones = open("informacion.txt", "a")
+                            archivoActuaciones = open("revisionDeActuacionesConsola/data/informacion.txt", "a")
                             print("FECHA COMPATIBLE ------------------------->")
                             archivoActuaciones.write("\n")                                                                                                                                                  
                             archivoActuaciones.write("NUMERO DEL PROCESO: " + numeroDeProceso + "\n")
@@ -294,7 +291,7 @@ def enviarArchivoCorreo():
     correo_receptor = "registroautomaticoactuaciones@gmail.com"
     asunto = "Registro escaneo de documento"
 
-    archivo_adjuntar = "informacion.txt"
+    archivo_adjuntar = "revisionDeActuacionesConsola/data/informacion.txt"
 
     smtp.login(correo_emisor, "lctc zggr fztd eokc")
  
@@ -312,7 +309,7 @@ def enviarArchivoCorreo():
     mensaje.attach(adjunto)
 
     smtp.sendmail(correo_emisor, correo_receptor, mensaje.as_string())
-    archivoActuaciones = open("informacion.txt", "w")
+    archivoActuaciones = open("revisionDeActuacionesConsola/data/informacion.txt", "w")
     archivoActuaciones.write("")
     archivoActuaciones.close()
     print("Correo enviado...")
@@ -335,7 +332,6 @@ def main():
     try:
         enviarArchivoCorreo()
     except Exception as e:
-        mensaje = "No se envio el correo, fallo de internet"
         #reporteDeErrores(mensaje)
         print(e.args[0])
         print("Error en el envio del correo")

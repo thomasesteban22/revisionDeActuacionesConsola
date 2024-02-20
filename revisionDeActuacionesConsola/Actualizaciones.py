@@ -47,9 +47,7 @@ def check_update():
         print("¿Desea instalar la actualización? (s/n)")
         answer = input()
         if answer == "s":
-            with open("revisionDeActuacionesConsola/versionAnterior.txt", "r") as f:
-                versionAnterior = f.read().strip()
-            # Reemplazar el código actual por el código nuevo
+            # Reemplazar el código actual de la carpeta (src) por el código nuevo
             filename = os.path.basename("revisionDeActuacionesConsola")
             if os.path.exists(filename):
                 try:
@@ -62,6 +60,6 @@ def check_update():
                 except:
                     print("error moviendo")
             else:
-                print("El archivo 'revisionActuacionesSinInterfaz' no existe.")
+                print("No se encuentra el archivo base")
     else:
         print("No hay actualizaciones disponibles.")
