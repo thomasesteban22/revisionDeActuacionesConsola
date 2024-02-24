@@ -1,6 +1,7 @@
 import os
 import pyinstaller
 
+
 # Nombre de tu script
 script_name = "tu_script.py"
 
@@ -28,4 +29,4 @@ Comment={script_name}
 Categories=Application;
 """)
 
-print("¡Ejecutable y acceso directo creados!")
+print("¡.exe and direct acces created!")

@@ -316,7 +316,6 @@ def enviarArchivoCorreo():
     smtp.quit()
     
 def main():
-
     logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s %(levelname)s %(message)s",
