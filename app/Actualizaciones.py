@@ -5,24 +5,24 @@ import shutil
 
 def check_update():
     # Obtener la versión actual de la aplicación
-    with open("revisionDeActuacionesConsola/version.txt", "r") as f:
+    with open("app/version.txt", "r") as f:
         versionActual = f.read().strip()
     print("Version Actual: " + versionActual)
 
     # Obtener la versión de la actualización disponible
-    response = requests.get("https://api.github.com/repos/thomasesteban22/revisionDeActuacionesConsola/releases/latest").json()
+    response = requests.get("https://api.github.com/repos/thomasesteban22/app/releases/latest").json()
     available_version = response.get("tag_name")
 
     # Si la versión disponible es superior a la versión actual, descargar la actualización
     if available_version is not None and available_version > versionActual:
         print("Version Disponible: " + available_version)
         # Descargar el archivo de actualización
-        with open("revisionDeActuacionesConsola/versionAnterior.txt", 'w') as versionAnteriorTxt:
+        with open("app/versionAnterior.txt", 'w') as versionAnteriorTxt:
             versionAnteriorTxt.write(versionActual)
 
-        with open("revisionDeActuacionesConsola/version.txt", 'w') as versionTxt:
+        with open("app/version.txt", 'w') as versionTxt:
             versionTxt.write(str(available_version))
-        update_url = "https://github.com/thomasesteban22/revisionDeActuacionesConsola/archive/refs/tags/" + available_version + ".zip"
+        update_url = "https://github.com/thomasesteban22/app/archive/refs/tags/" + available_version + ".zip"
 
         # Verificar si el archivo de actualización existe
         head_response = requests.head(update_url)
@@ -31,13 +31,13 @@ def check_update():
             return
 
         # Guardar el archivo de actualización en el disco como un archivo binario
-        with open("revisionDeActuacionesConsola/update.zip", "wb") as f:
+        with open("app/update.zip", "wb") as f:
             f.write(requests.get(update_url).content)
 
 
         # Try to unzip the update file
         try:
-            with zipfile.ZipFile("revisionDeActuacionesConsola/update.zip", "r") as zip_ref:
+            with zipfile.ZipFile("app/update.zip", "r") as zip_ref:
                 zip_ref.extractall()
         except Exception as e:
             print("Error al descargar o descomprimir la actualización:", e)
@@ -48,15 +48,15 @@ def check_update():
         answer = input()
         if answer == "s":
             # Reemplazar el código actual de la carpeta (src) por el código nuevo
-            filename = os.path.basename("revisionDeActuacionesConsola")
+            filename = os.path.basename("app")
             if os.path.exists(filename):
                 try:
-                    shutil.rmtree("revisionDeActuacionesConsola/src")
-                    dirActualizacion = "revisionDeActuacionesConsola-"+str(available_version)+"/revisionDeActuacionesConsola/src"
-                    dirRoot = "revisionDeActuacionesConsola/src"
+                    shutil.rmtree("app/src")
+                    dirActualizacion = "app-"+str(available_version)+"/app/src"
+                    dirRoot = "app/src"
                     shutil.move(dirActualizacion, dirRoot)
-                    os.remove("revisionDeActuacionesConsola/update.zip")
-                    shutil.rmtree("revisionDeActuacionesConsola-"+ str(available_version))
+                    os.remove("app/update.zip")
+                    shutil.rmtree("app-"+ str(available_version))
                 except:
                     print("error moviendo")
             else:

@@ -20,7 +20,7 @@ def scheduled_task():
         check_update()
     except Exception as e:
         print(f"Error en la actualizacion: {e}")
-    subprocess.run(["python", "revisionDeActuacionesConsola/src/main.py"])
+    subprocess.run(["python", "app/src/main.py"])
     print("Tarea programada completada.")
 
 # Programar la tarea para que se ejecute todos los días a las 12:00 PM hora local
