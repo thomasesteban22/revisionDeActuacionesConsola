@@ -24,7 +24,7 @@ def scheduled_task():
     print("Tarea programada completada.")
 
 # Programar la tarea para que se ejecute todos los días a las 12:00 PM hora local
-@scheduler.task('cron', id='do_job_1', hour=15, minute=0)
+@scheduler.task('cron', id='do_job_1', hour=15, minute=22)
 def job1():
     scheduled_task()
 
@@ -33,4 +33,4 @@ def index():
     return "La aplicación está en funcionamiento y la tarea está programada."
 
 if __name__ == "__main__":
-    app.run(host='magnaabogados-revision-actuaciones.kfvjqf.easypanel.h', port=5000)
+    app.run(host='0.0.0.0', port=5000)
