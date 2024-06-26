@@ -33,4 +33,4 @@ def index():
     return "La aplicación está en funcionamiento y la tarea está programada."
 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=5000)
+    app.run(host='magnaabogados-revision-actuaciones.kfvjqf.easypanel.h', port=5000)
