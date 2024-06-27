@@ -58,7 +58,7 @@ def obtenerFechaDeHoy():
 def recorrerElExcel():
     try:
         # Abre el archivo Excel
-        wb = openpyxl.load_workbook("src/FOLDERESBASENUEVA.xlsm")
+        wb = openpyxl.load_workbook("/src/FOLDERESBASENUEVA.xlsm")
         # Obtiene la hoja de trabajo activa
         ws = (wb["CONSULTA UNIFICADA DE PROCESOS"])
     except:
@@ -326,6 +326,7 @@ def main():
         pass
         print(e.args[0])
         print("Se detuvo el recorrido de Excel")
+        print(e)
     """"
     try:
         enviarArchivoCorreo()

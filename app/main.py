@@ -9,14 +9,12 @@ def scheduled_task():
     try:
         check_update()
     except Exception as e:
+        subprocess.run(["python", "/src/main.py"])
         print(f"Error en la actualizacion: {e}")
-    subprocess.run(["python", "src/main.py"])
+        
     print("Tarea programada completada.")
 
-# Ruta de prueba para verificar que la aplicación está en funcionamiento
-@app.route('/')
-def index():
-    return "La aplicación está en funcionamiento."
+
 
 if __name__ == "__main__":
     
