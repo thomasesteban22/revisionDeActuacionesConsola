@@ -20,10 +20,11 @@ def scheduled_task():
 
 # Programar la tarea para que se ejecute todos los días a las 16:00 (4:00 PM)
 
-schedule.every().day.at("23:16").do(scheduled_task)
+schedule.every().day.at("23:25").do(scheduled_task)
 
 # Función para ejecutar la planificación en segundo plano
 def run_scheduler():
+    print("corriendo scheduler")
     while True:
         schedule.run_pending()
         time.sleep(1)
