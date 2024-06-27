@@ -7,6 +7,8 @@ import threading
 
 app = Flask(__name__)
 
+print("En el archivo main")
+
 def scheduled_task():
     print("Ejecutando la tarea programada...")
     try:
@@ -17,8 +19,8 @@ def scheduled_task():
     print("Tarea programada completada.")
 
 # Programar la tarea para que se ejecute todos los días a las 16:00 (4:00 PM)
-print(schedule)
-schedule.every().day.at("23:10").do(scheduled_task)
+
+schedule.every().day.at("23:12").do(scheduled_task)
 
 # Función para ejecutar la planificación en segundo plano
 def run_scheduler():
