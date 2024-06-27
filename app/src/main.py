@@ -326,12 +326,12 @@ def main():
         pass
         print(e.args[0])
         print("Se detuvo el recorrido de Excel")
-
+    """"
     try:
         enviarArchivoCorreo()
     except Exception as e:
         #reporteDeErrores(mensaje)
         print(e.args[0])
         print("Error en el envio del correo")
-
+    """
 main()
