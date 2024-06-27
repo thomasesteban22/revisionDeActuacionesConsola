@@ -6,7 +6,7 @@ print("En actualizaciones")
 
 def check_update():
     # Obtener la versión actual de la aplicación
-    with open("app/version.txt", "r") as f:
+    with open("version.txt", "r") as f:
         versionActual = f.read().strip()
     print("Version Actual: " + versionActual)
 
@@ -18,10 +18,10 @@ def check_update():
     if available_version is not None and available_version > versionActual:
         print("Version Disponible: " + available_version)
         # Descargar el archivo de actualización
-        with open("app/versionAnterior.txt", 'w') as versionAnteriorTxt:
+        with open("versionAnterior.txt", 'w') as versionAnteriorTxt:
             versionAnteriorTxt.write(versionActual)
 
-        with open("app/version.txt", 'w') as versionTxt:
+        with open("version.txt", 'w') as versionTxt:
             versionTxt.write(str(available_version))
         update_url = "https://github.com/thomasesteban22/app/archive/refs/tags/" + available_version + ".zip"
 
@@ -32,13 +32,13 @@ def check_update():
             return
 
         # Guardar el archivo de actualización en el disco como un archivo binario
-        with open("app/update.zip", "wb") as f:
+        with open("update.zip", "wb") as f:
             f.write(requests.get(update_url).content)
 
 
         # Try to unzip the update file
         try:
-            with zipfile.ZipFile("app/update.zip", "r") as zip_ref:
+            with zipfile.ZipFile("update.zip", "r") as zip_ref:
                 zip_ref.extractall()
         except Exception as e:
             print("Error al descargar o descomprimir la actualización:", e)
@@ -52,11 +52,11 @@ def check_update():
             filename = os.path.basename("app")
             if os.path.exists(filename):
                 try:
-                    shutil.rmtree("app/src")
+                    shutil.rmtree("src")
                     dirActualizacion = "app-"+str(available_version)+"/app/src"
-                    dirRoot = "app/src"
+                    dirRoot = "src"
                     shutil.move(dirActualizacion, dirRoot)
-                    os.remove("app/update.zip")
+                    os.remove("update.zip")
                     shutil.rmtree("app-"+ str(available_version))
                 except:
                     print("error moviendo")
