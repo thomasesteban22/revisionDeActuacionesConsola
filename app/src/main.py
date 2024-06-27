@@ -31,7 +31,7 @@ def check_internet():
         return False
 
 
-diasDeBusqueda = int(input("¿Cuántos días quiere escanear?\n"))
+diasDeBusqueda = 1
 
 def reporteDeErrores(mensaje):
     fechaHoy = obtenerFechaDeHoy
