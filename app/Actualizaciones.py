@@ -7,7 +7,7 @@ def check_update():
     # Obtener la versión actual de la aplicación
     with open("version.txt", "r") as f:
         versionActual = f.read().strip()
-    print("------------- Version Actual: " + versionActual + "-------------")
+    print("-------------> Version Actual: " + versionActual)
 
     # Obtener la versión de la actualización disponible
     response = requests.get("https://api.github.com/repos/thomasesteban22/app/releases/latest").json()
@@ -62,4 +62,4 @@ def check_update():
             else:
                 print("No se encuentra el archivo base")
     else:
-        print("-------------No hay actualizaciones disponibles.-------------")
+        print("------------> No hay actualizaciones disponibles.")

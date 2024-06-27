@@ -58,7 +58,7 @@ def obtenerFechaDeHoy():
 def recorrerElExcel():
     try:
         # Abre el archivo Excel
-        wb = openpyxl.load_workbook("revisionDeActuacionesConsola/src/FOLDERESBASENUEVA.xlsm")
+        wb = openpyxl.load_workbook("src/FOLDERESBASENUEVA.xlsm")
         # Obtiene la hoja de trabajo activa
         ws = (wb["CONSULTA UNIFICADA DE PROCESOS"])
     except:
