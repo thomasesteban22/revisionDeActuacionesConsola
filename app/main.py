@@ -1,13 +1,8 @@
 from flask import Flask
-import threading
-import time
-import schedule
 import subprocess
 from Actualizaciones import check_update as check_update
 
 app = Flask(__name__)
-
-print("Ejecutado el archivo main")
 
 def scheduled_task():
     print("Ejecutando la tarea programada...")
@@ -18,23 +13,14 @@ def scheduled_task():
     subprocess.run(["python", "app/src/main.py"])
     print("Tarea programada completada.")
 
-# Programar la tarea para que se ejecute todos los días a las 16:00 (4:00 PM)
-schedule.every().day.at("23:51").do(scheduled_task)
-
-# Función para ejecutar la planificación en segundo plano
-def run_scheduler():
-    while True:
-        schedule.run_pending()
-        time.sleep(1)
-
 # Ruta de prueba para verificar que la aplicación está en funcionamiento
 @app.route('/')
 def index():
-    return "La aplicación está en funcionamiento y la tarea está programada."
+    return "La aplicación está en funcionamiento."
 
 if __name__ == "__main__":
-    # Iniciar la ejecución del planificador en segundo plano
-    scheduler_thread = threading.Thread(target=run_scheduler)
-    scheduler_thread.start()
+    # Ejecutar la tarea programada una vez al iniciar el script
+    scheduled_task()
 
-    # No es necesario ejecutar Waitress aquí, esto se manejará desde el Dockerfile
+    # Ejecutar la aplicación Flask con Waitress (ya está ejecutándose en Docker)
+    app.run(host='0.0.0.0', port=5000)

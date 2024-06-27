@@ -31,7 +31,7 @@ def check_internet():
         return False
 
 
-diasDeBusqueda = 1
+diasDeBusqueda = 2
 
 def reporteDeErrores(mensaje):
     fechaHoy = obtenerFechaDeHoy
