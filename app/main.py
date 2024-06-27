@@ -19,6 +19,6 @@ def index():
     return "La aplicación está en funcionamiento."
 
 if __name__ == "__main__":
-    # Ejecutar la tarea programada una vez al iniciar el script
+    print("Ejecutado main.py")
     scheduled_task()
 
