@@ -7,6 +7,8 @@ from Actualizaciones import check_update as check_update
 
 app = Flask(__name__)
 
+print("Ejecutado el archivo main")
+
 def scheduled_task():
     print("Ejecutando la tarea programada...")
     try:
@@ -17,7 +19,7 @@ def scheduled_task():
     print("Tarea programada completada.")
 
 # Programar la tarea para que se ejecute todos los días a las 16:00 (4:00 PM)
-schedule.every().day.at("23:34").do(scheduled_task)
+schedule.every().day.at("23:48").do(scheduled_task)
 
 # Función para ejecutar la planificación en segundo plano
 def run_scheduler():
@@ -35,9 +37,4 @@ if __name__ == "__main__":
     scheduler_thread = threading.Thread(target=run_scheduler)
     scheduler_thread.start()
 
-    # Ejecutar la aplicación Flask con Gunicorn en vez del servidor de desarrollo
-    # Usa workers adecuados según tus necesidades (ejemplo: 4 workers)
-    # Usa un timeout adecuado para tu aplicación (ejemplo: 120 segundos)
-    # Gunicorn puede escuchar en 0.0.0.0:5000 automáticamente
-    cmd = 'gunicorn -w 4 -b 0.0.0.0:5000 --timeout 120 app:app'
-    subprocess.Popen(cmd, shell=True)
+    # No es necesario ejecutar Waitress aquí, esto se manejará desde el Dockerfile
