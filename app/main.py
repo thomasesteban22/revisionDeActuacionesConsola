@@ -1,20 +1,13 @@
 from flask import Flask
-from flask_apscheduler import APScheduler
+import schedule
+import time
 import subprocess
 from Actualizaciones import check_update as check_update
+import threading
 
 app = Flask(__name__)
 
-class Config:
-    SCHEDULER_API_ENABLED = True
-
-app.config.from_object(Config())
-
-scheduler = APScheduler()
-scheduler.init_app(app)
-scheduler.start()
-
-def scheduled_task(): 
+def scheduled_task():
     print("Ejecutando la tarea programada...")
     try:
         check_update()
@@ -23,14 +16,24 @@ def scheduled_task():
     subprocess.run(["python", "app/src/main.py"])
     print("Tarea programada completada.")
 
-# Programar la tarea para que se ejecute todos los días a las 12:00 PM
-@scheduler.task('cron', id='do_job_1', hour=16, minute=0)
-def job1():
-    scheduled_task()
+# Programar la tarea para que se ejecute todos los días a las 16:00 (4:00 PM)
+schedule.every().day.at("16:00").do(scheduled_task)
 
+# Función para ejecutar la planificación en segundo plano
+def run_scheduler():
+    while True:
+        schedule.run_pending()
+        time.sleep(1)
+
+# Ruta de prueba para verificar que la aplicación está en funcionamiento
 @app.route('/')
 def index():
     return "La aplicación está en funcionamiento y la tarea está programada."
 
 if __name__ == "__main__":
+    # Iniciar la ejecución del planificador en segundo plano
+    scheduler_thread = threading.Thread(target=run_scheduler)
+    scheduler_thread.start()
+
+    # Ejecutar la aplicación Flask
     app.run(host='0.0.0.0', port=5000)
