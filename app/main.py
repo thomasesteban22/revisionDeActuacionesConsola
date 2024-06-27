@@ -22,5 +22,3 @@ if __name__ == "__main__":
     # Ejecutar la tarea programada una vez al iniciar el script
     scheduled_task()
 
-    # Ejecutar la aplicación Flask con Waitress (ya está ejecutándose en Docker)
-    app.run(host='0.0.0.0', port=5000)
