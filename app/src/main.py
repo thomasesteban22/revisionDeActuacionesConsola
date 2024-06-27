@@ -4,18 +4,15 @@ from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-
 import datetime
 import locale
 from datetime import date, timedelta
 from datetime import datetime
 from time import sleep
-
 import smtplib
 from email.mime.application import MIMEApplication
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-
 import logging
 import openpyxl
 
