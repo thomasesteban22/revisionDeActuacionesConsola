@@ -23,8 +23,8 @@ def scheduled_task():
     subprocess.run(["python", "app/src/main.py"])
     print("Tarea programada completada.")
 
-# Programar la tarea para que se ejecute todos los días a las 12:00 PM hora local
-@scheduler.task('cron', id='do_job_1', hour=15, minute=22)
+# Programar la tarea para que se ejecute todos los días a las 12:00 PM
+@scheduler.task('cron', id='do_job_1', hour=16, minute=0)
 def job1():
     scheduled_task()
 
