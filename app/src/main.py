@@ -20,7 +20,7 @@ import openpyxl
 
 import requests
 
-print("en busqueda main")
+print("-------------> Inciando busqueda de procesos")
 
 def check_internet():
     try:
@@ -86,7 +86,7 @@ def recorrerElExcel():
     except:
         pass
 
-    archivoActuaciones = open("revisionDeActuacionesConsola/data/informacion.txt", "a")
+    archivoActuaciones = open("data/informacion.txt", "a")
     archivoActuaciones.write("\n")
 
     indiceFila = fila - 1
