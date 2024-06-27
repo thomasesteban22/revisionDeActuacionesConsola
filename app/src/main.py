@@ -23,6 +23,8 @@ import openpyxl
 
 import requests
 
+print("en busqueda main")
+
 def check_internet():
     try:
         requests.get("https://consultaprocesos.ramajudicial.gov.co/Procesos/NumeroRadicacion", timeout=10)  # Agregué un tiempo de espera de 5 segundos

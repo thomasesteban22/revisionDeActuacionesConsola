@@ -2,6 +2,7 @@ import os
 import requests
 import zipfile
 import shutil
+print("En actualizaciones")
 
 def check_update():
     # Obtener la versión actual de la aplicación
