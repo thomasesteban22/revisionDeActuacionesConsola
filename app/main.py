@@ -9,7 +9,7 @@ def scheduled_task():
     try:
         check_update()
     except Exception as e:
-        subprocess.run(["python", "/src/main.py"])
+        subprocess.run(["python", "src/main.py"])
         print(f"Error en la actualizacion: {e}")
         
     print("Tarea programada completada.")
