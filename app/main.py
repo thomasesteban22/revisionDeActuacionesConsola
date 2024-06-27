@@ -3,7 +3,7 @@ import subprocess
 from Actualizaciones import check_update as check_update
 
 app = Flask(__name__)
-
+print("Ejecutado main.py")
 def scheduled_task():
     print("Ejecutando la tarea programada...")
     try:
@@ -19,6 +19,6 @@ def index():
     return "La aplicación está en funcionamiento."
 
 if __name__ == "__main__":
-    print("Ejecutado main.py")
+    
     scheduled_task()
 
