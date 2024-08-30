@@ -25,7 +25,7 @@ import time
 diasDeBusqueda = 2
 
 # Ruta al controlador msedgedriver.exe
-msedge_driver_path = r'./msedgedriver.exe'
+chrome_driver_path = r'chromedriver.exe'
 
 
 def guardadoDeLogs(fInicio, fFinal, numRegistrosEscaneados):
@@ -47,7 +47,7 @@ def obtenerFechaDeHoy():
 def recorrerElExcel():
     try:
         # Abre el archivo Excel
-        wb = openpyxl.load_workbook("src/FOLDERESBASENUEVA.xlsm")
+        wb = openpyxl.load_workbook("FOLDERESBASENUEVA.xlsm")
         # Obtiene la hoja de trabajo activa
         ws = wb["CONSULTA UNIFICADA DE PROCESOS"]
         print("Archivo Excel abierto correctamente.")
@@ -93,17 +93,17 @@ def revisarActuaciones(numeroDeProceso):
         print("No se pudo obtener la fecha de hoy. Saliendo de la función.")
         return
 
-    options = webdriver.EdgeOptions()
+    options = webdriver.ChromeOptions()
     options.add_argument('--headless')
     options.add_argument('--disable-gpu')
     options.add_argument('--no-sandbox')
     options.add_argument('--disable-dev-shm-usage')
 
-    # Configurar el servicio para Edge
-    service = Service(executable_path=msedge_driver_path)
+    # Configurar el servicio para Chrome
+    service = Service(executable_path=chrome_driver_path)
 
-    # Inicializa el navegador Edge utilizando el servicio configurado
-    driver = webdriver.Edge(service=service, options=options)
+    # Inicializa el navegador Chrome utilizando el servicio configurado
+    driver = webdriver.Chrome(service=service, options=options)
 
     while True:
         try:
