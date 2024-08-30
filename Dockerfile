@@ -10,11 +10,11 @@ COPY requirements.txt .
 # Instala las dependencias
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copia el contenido de la carpeta 'revisionDeActuacionesConsola/app' al contenedor
+# Copia el contenido de la carpeta 'app' al contenedor
 COPY ./app /app
 
 # Expone el puerto en el que la aplicación correrá
 EXPOSE 5000
 
-# Establece el comando para ejecutar la aplicación con Waitress
-CMD ["waitress-serve", "--listen", "0.0.0.0:5000", "main:app"]
+# Establece el comando para ejecutar la aplicación
+CMD ["python", "main.py"]
