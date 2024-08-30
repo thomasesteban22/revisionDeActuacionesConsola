@@ -11,7 +11,7 @@ def print_current_time():
 def scheduled_task():
     print(f"{datetime.now()}: Ejecutando la tarea programada...")
     try:
-        subprocess.run(["python", "/app/src/main2.py"])  # Ejecutar el subproceso
+        subprocess.run(["python", "/app/src/testMseEdgeDriver.py"])  # Ejecutar el subproceso
         print("Subproceso ejecutado correctamente")
     except Exception as e:
         print(f"Error al ejecutar el subproceso: {e}")
@@ -22,7 +22,7 @@ def run_scheduler():
         print_current_time()
         colombia_tz = pytz.timezone('America/Bogota')
         current_time = datetime.now(colombia_tz)
-        if current_time.hour == 14 and current_time.minute == 8:
+        if current_time.hour == 14 and current_time.minute == 53:
             scheduled_task()
         time.sleep(25)  # Sleep for 25 seconds
 
