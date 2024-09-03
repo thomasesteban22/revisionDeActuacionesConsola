@@ -30,13 +30,6 @@ RUN apt-get update && apt-get install -y \
     locales \
     --no-install-recommends
 
-# Establece el locale directamente en el Dockerfile
-ENV LANG es_ES.UTF-8
-ENV LANGUAGE es_ES:es
-ENV LC_ALL es_ES.UTF-8
-
-# Genera la configuración regional
-RUN locale-gen es_ES.UTF-8
 
 # Establece el directorio de trabajo en /app
 WORKDIR /app
