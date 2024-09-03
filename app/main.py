@@ -31,7 +31,7 @@ def run_scheduler():
         print_current_time()
         colombia_tz = pytz.timezone('America/Bogota')
         current_time = datetime.now(colombia_tz)
-        if current_time.hour == 22 and current_time.minute == 59:
+        if current_time.hour == 18 and current_time.minute == 48:
             scheduled_task()
         time.sleep(25)  # Sleep for 25 seconds
 
@@ -41,4 +41,4 @@ def index():
 
 if __name__ == "__main__":
     threading.Thread(target=run_scheduler).start()
-    app.run(host='0.0.0.0', port=5000)
+    #app.run(host='0.0.0.0', port=5000)
