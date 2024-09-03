@@ -1,7 +1,11 @@
-import time
+from flask import Flask, jsonify
+from apscheduler.schedulers.background import BackgroundScheduler
 from datetime import datetime
 import pytz
 import subprocess
+
+app = Flask(__name__)
+scheduler = BackgroundScheduler()
 
 
 def print_current_time():
@@ -20,15 +24,15 @@ def scheduled_task():
     print(f"{datetime.now()}: Tarea programada completada.")
 
 
-def run_scheduler():
-    while True:
-        print_current_time()
-        colombia_tz = pytz.timezone('America/Bogota')
-        current_time = datetime.now(colombia_tz)
-        if current_time.hour == 22 and current_time.minute == 59:
-            scheduled_task()
-        time.sleep(25)  # Sleep for 25 seconds
+# Configura el trabajo programado
+scheduler.add_job(scheduled_task, 'cron', hour=22, minute=59)
+scheduler.start()
+
+
+@app.route('/')
+def home():
+    return jsonify({"message": "Aplicación Flask en ejecución"})
 
 
 if __name__ == "__main__":
-    run_scheduler()
+    app.run(host='0.0.0.0', port=5000)
