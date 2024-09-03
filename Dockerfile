@@ -30,6 +30,13 @@ RUN apt-get update && apt-get install -y \
     locales \
     --no-install-recommends
 
+# Establece el locale directamente en el Dockerfile
+ENV LANG es_ES.UTF-8
+ENV LANGUAGE es_ES:es
+ENV LC_ALL es_ES.UTF-8
+
+# Genera la configuración regional
+RUN locale-gen es_ES.UTF-8
 
 # Establece el directorio de trabajo en /app
 WORKDIR /app
@@ -46,5 +53,5 @@ COPY ./app /app
 # Expone el puerto en el que la aplicación correrá
 EXPOSE 5000
 
-# Establece el comando para ejecutar la aplicación
-CMD ["python", "main.py"]
+# Establece el comando de entrada para ejecutar la aplicación
+ENTRYPOINT ["python", "main.py"]
