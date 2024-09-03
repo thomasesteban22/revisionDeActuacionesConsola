@@ -30,13 +30,6 @@ RUN apt-get update && apt-get install -y \
     locales \
     --no-install-recommends
 
-# Establece el locale directamente en el Dockerfile
-ENV LANG es_ES.UTF-8
-ENV LANGUAGE es_ES:es
-ENV LC_ALL es_ES.UTF-8
-
-# Genera la configuración regional
-RUN locale-gen es_ES.UTF-8
 
 # Establece el directorio de trabajo en /app
 WORKDIR /app
@@ -47,6 +40,8 @@ COPY requirements.txt .
 # Instala las dependencias de Python
 RUN pip install --no-cache-dir -r requirements.txt
 
+ENV TERM=xterm
+
 # Copia el contenido de la carpeta 'app' al contenedor
 COPY ./app /app
 
@@ -54,4 +49,4 @@ COPY ./app /app
 EXPOSE 5000
 
 # Establece el comando para ejecutar la aplicación con Waitress
-CMD ["waitress-serve", "--listen=0.0.0.0:5000", "main:app"]
+CMD ["python", "main.py"]

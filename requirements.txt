@@ -100,4 +100,4 @@ xyzservices==2023.10.1
 zope.event==5.0
 zope.interface==6.1
 app~=0.0.1
-APScheduler
+apscheduler==3.8.1
