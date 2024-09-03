@@ -1,4 +1,5 @@
-from flask import Flask, jsonify
+import logging
+from flask import Flask
 import time
 from datetime import datetime
 import pytz
@@ -7,22 +8,23 @@ import threading
 
 app = Flask(__name__)
 
+# Configure logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s [%(levelname)s] %(message)s')
+logger = logging.getLogger(__name__)
 
 def print_current_time():
     colombia_tz = pytz.timezone('America/Bogota')
     current_time = datetime.now(colombia_tz).strftime("%Y-%m-%d %H:%M:%S")
-    print(f"Hora actual en Bogotá, Colombia: {current_time}")
-
+    logger.info(f"Hora actual en Bogotá, Colombia: {current_time}")
 
 def scheduled_task():
-    print(f"{datetime.now()}: Ejecutando la tarea programada...")
+    logger.info("Ejecutando la tarea programada...")
     try:
         subprocess.run(["python", "/app/src/main2.py"])  # Ejecutar el subproceso
-        print("Subproceso ejecutado correctamente")
+        logger.info("Subproceso ejecutado correctamente")
     except Exception as e:
-        print(f"Error al ejecutar el subproceso: {e}")
-    print(f"{datetime.now()}: Tarea programada completada.")
-
+        logger.error(f"Error al ejecutar el subproceso: {e}")
+    logger.info("Tarea programada completada.")
 
 def run_scheduler():
     while True:
@@ -33,11 +35,9 @@ def run_scheduler():
             scheduled_task()
         time.sleep(25)  # Sleep for 25 seconds
 
-
 @app.route('/')
 def index():
     return 'La aplicación de webscrapping está funcionando'
-
 
 if __name__ == "__main__":
     threading.Thread(target=run_scheduler).start()

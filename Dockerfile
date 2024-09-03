@@ -47,3 +47,4 @@ EXPOSE 5000
 
 # Establece el comando para ejecutar la aplicación con Waitress
 CMD ["waitress-serve", "--listen", "0.0.0.0:5000", "main:app"]
+
