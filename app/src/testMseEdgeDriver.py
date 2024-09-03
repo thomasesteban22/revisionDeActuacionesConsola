@@ -3,7 +3,7 @@ from selenium.webdriver.chrome.service import Service
 
 
 def main():
-    chrome_driver_path = r'chromedriver.exe'
+    chrome_driver_path = r'chromedriverWin.exe'
 
     service = Service(executable_path=chrome_driver_path)
     options = webdriver.ChromeOptions()

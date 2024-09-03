@@ -22,10 +22,10 @@ import openpyxl
 
 import time
 
-diasDeBusqueda = 2
+diasDeBusqueda = 5
 
 # Ruta al controlador msedgedriver.exe
-chrome_driver_path = r'chromedriver.exe'
+service = Service(executable_path='/usr/bin/chromedriver')  # Ruta común en Linux
 
 
 def guardadoDeLogs(fInicio, fFinal, numRegistrosEscaneados):
@@ -44,15 +44,33 @@ def obtenerFechaDeHoy():
         return None
 
 
+import os
+
+
 def recorrerElExcel():
     try:
+        # Verifica si el directorio existe
+        if not os.path.exists("/app/data"):
+            print("El directorio /app/data no existe.")
+            return
+
+        # Verifica si el archivo se puede abrir
+        archivo_path = "/app/data/informacion.txt"
+        try:
+            with open(archivo_path, "a") as archivoActuaciones:
+                archivoActuaciones.write("\n")
+                archivoActuaciones.flush()
+                print(f"Archivo {archivo_path} abierto y limpiado correctamente.")
+        except IOError as e:
+            print(f"No se pudo abrir o escribir en el archivo {archivo_path}: {e}")
+            return
+
         # Abre el archivo Excel
-        wb = openpyxl.load_workbook("FOLDERESBASENUEVA.xlsm")
-        # Obtiene la hoja de trabajo activa
+        wb = openpyxl.load_workbook("/app/src/FOLDERESBASENUEVA.xlsm")
         ws = wb["CONSULTA UNIFICADA DE PROCESOS"]
         print("Archivo Excel abierto correctamente.")
-    except:
-        print("Error abriendo el Excel, verificar ruta y nombre del archivo")
+    except Exception as e:
+        print(f"Error abriendo el Excel: {e}")
         return
 
     # Obtiene el número de filas de la hoja de trabajo
@@ -71,18 +89,16 @@ def recorrerElExcel():
         print(f"Error en recorrer el Excel: {e}")
         pass
 
-    archivoActuaciones = open(
-        "data/informacion.txt", "a")
-    archivoActuaciones.write("\n")
-
-    indiceFila = fila - 1
-    texto = f"# REGISTROS ESCANEADOS: {indiceFila} DE: {n_filas}\n"
-    print(f"Registros escaneados: {indiceFila} de {n_filas}")
-
-    archivoActuaciones.write("######################################\n")
-    archivoActuaciones.write(texto)
-    archivoActuaciones.write("######################################\n")
-    archivoActuaciones.close()
+    try:
+        with open("/app/data/informacion.txt", "a") as archivoActuaciones:
+            archivoActuaciones.write("\n")
+            archivoActuaciones.write("######################################\n")
+            archivoActuaciones.write(f"# REGISTROS ESCANEADOS: {fila - 1} DE: {n_filas}\n")
+            archivoActuaciones.write("######################################\n")
+            archivoActuaciones.flush()
+            print(f"Información añadida al archivo {archivo_path}.")
+    except Exception as e:
+        print(f"Error escribiendo en el archivo de información: {e}")
 
 
 def revisarActuaciones(numeroDeProceso):
@@ -98,9 +114,6 @@ def revisarActuaciones(numeroDeProceso):
     options.add_argument('--disable-gpu')
     options.add_argument('--no-sandbox')
     options.add_argument('--disable-dev-shm-usage')
-
-    # Configurar el servicio para Chrome
-    service = Service(executable_path=chrome_driver_path)
 
     # Inicializa el navegador Chrome utilizando el servicio configurado
     driver = webdriver.Chrome(service=service, options=options)
@@ -193,7 +206,7 @@ def revisarActuaciones(numeroDeProceso):
                     fecha_comparacion = fecha_comparacion.strftime("%Y-%m-%d")
                     if fechaObtenida_str == fecha_comparacion:
                         with open(
-                                "../../../../Escritorio/revisionDeActuacionesConsola/revisionDeActuacionesConsola/src/informacion.txt",
+                                "/app/data/informacion.txt",
                                 "a") as archivoActuaciones:
                             archivoActuaciones.write("\n")
                             archivoActuaciones.write(f"NUMERO DEL PROCESO: {numeroDeProceso}\n")
@@ -212,15 +225,14 @@ def revisarActuaciones(numeroDeProceso):
 
 def enviarArchivoCorreo():
     fecha_ahora = datetime.now()
-    locale.setlocale(locale.LC_ALL, 'es_ES')
     fechaHoyStr = fecha_ahora.strftime("%A %d - %m - %Y a las %I:%M %p").capitalize()
 
     smtp = smtplib.SMTP_SSL("smtp.gmail.com")
     correo_emisor = "registroautomaticoactuaciones@gmail.com"
     correo_receptor = "registroautomaticoactuaciones@gmail.com"
-    asunto = "Registro escaneo de documento"
+    asunto = "Registro escaneo de documento desde el servidor"
 
-    archivo_adjuntar = "informacion.txt"
+    archivo_adjuntar = "/app/data/informacion.txt"
 
     smtp.login(correo_emisor, "lctc zggr fztd eokc")
 
@@ -251,7 +263,7 @@ def main():
 
         guardadoDeLogs(fechaHoy, fechaFinal, 10)
 
-        #enviarArchivoCorreo()
+        enviarArchivoCorreo()
 
     except Exception as e:
         print(f"Error en el main: {e}")
