@@ -22,6 +22,9 @@ logger = logging.getLogger(__name__)
 
 diasDeBusqueda = 5
 
+print("Mensaje importante", flush=True)
+
+
 # Ruta al controlador msedgedriver.exe
 service = Service(executable_path='/usr/bin/chromedriver')  # Ruta común en Linux
 
