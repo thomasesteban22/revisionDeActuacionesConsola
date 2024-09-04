@@ -43,7 +43,7 @@ def scheduled_task():
     except Exception as e:
         logger.error(f"Error al ejecutar el subproceso: {e}")
 
-    logger.info("Tarea programada completada.")
+    logger.info("Tarea programada completada")
 
 
 def run_scheduler():
