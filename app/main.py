@@ -23,9 +23,9 @@ def scheduled_task():
     logger.info("Ejecutando la tarea programada...")
     try:
         result = subprocess.run(
-            ["python", "/app/src/main2.py"],
-            capture_output=True,  # Capture stdout and stderr
-            text=True  # Ensure the output is returned as a string rather than bytes
+            ["python", "-u", "/app/src/main2.py"],
+            capture_output=True,
+            text=True
         )
         # Log the stdout and stderr from main2.py
         logger.info(f"Subproceso stdout: {result.stdout}")
@@ -41,7 +41,7 @@ def run_scheduler():
         print_current_time()
         colombia_tz = pytz.timezone('America/Bogota')
         current_time = datetime.now(colombia_tz)
-        if current_time.hour == 18 and current_time.minute == 57:
+        if current_time.hour == 19 and current_time.minute == 3:
             scheduled_task()
         time.sleep(25)  # Sleep for 25 seconds
 
