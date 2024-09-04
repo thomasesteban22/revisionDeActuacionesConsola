@@ -20,10 +20,7 @@ import openpyxl
 logging.basicConfig(level=logging.INFO, format='%(asctime)s [%(levelname)s] %(message)s')
 logger = logging.getLogger(__name__)
 
-diasDeBusqueda = 4
-
-print("Mensaje importante", flush=True)
-
+diasDeBusqueda = 5
 
 # Ruta al controlador msedgedriver.exe
 service = Service(executable_path='/usr/bin/chromedriver')  # Ruta común en Linux
@@ -38,17 +35,17 @@ def guardadoDeLogs(fInicio, fFinal, numRegistrosEscaneados):
 def obtenerFechaDeHoy():
     try:
         fechaHoy = datetime.now()
-        logger.info(f"Fecha de hoy obtenida: {fechaHoy}")
+        print(f"Fecha de hoy obtenida: {fechaHoy}", flush=True)
         return fechaHoy
     except Exception as e:
-        logger.error("Error obteniendo la fecha de hoy, posible fallo de internet")
+        print("Error obteniendo la fecha de hoy, posible fallo de internet", flush=True)
         return None
 
 
 def recorrerElExcel():
     try:
         if not os.path.exists("/app/data"):
-            logger.error("El directorio /app/data no existe.")
+            print("El directorio /app/data no existe.", flush=True)
             return
 
         archivo_path = "/app/data/informacion.txt"
@@ -56,20 +53,20 @@ def recorrerElExcel():
             with open(archivo_path, "a") as archivoActuaciones:
                 archivoActuaciones.write("\n")
                 archivoActuaciones.flush()
-                logger.info(f"Archivo {archivo_path} abierto y limpiado correctamente.")
+                print(f"Archivo {archivo_path} abierto y limpiado correctamente.", flush=True)
         except IOError as e:
-            logger.error(f"No se pudo abrir o escribir en el archivo {archivo_path}: {e}")
+            print(f"No se pudo abrir o escribir en el archivo {archivo_path}: {e}", flush=True)
             return
 
         wb = openpyxl.load_workbook("/app/src/FOLDERESBASENUEVA.xlsm")
         ws = wb["CONSULTA UNIFICADA DE PROCESOS"]
-        logger.info("Archivo Excel abierto correctamente.")
+        print("Archivo Excel abierto correctamente.", flush=True)
     except Exception as e:
-        logger.error(f"Error abriendo el Excel: {e}")
+        print(f"Error abriendo el Excel: {e}", flush=True)
         return
 
     n_filas = ws.max_row
-    logger.info(f"Número de filas en la hoja de trabajo: {n_filas}")
+    print(f"Número de filas en la hoja de trabajo: {n_filas}", flush=True)
 
     try:
         for fila in range(2, n_filas + 1):
@@ -80,7 +77,7 @@ def recorrerElExcel():
             else:
                 revisarActuaciones(numeroDeProceso)
     except Exception as e:
-        logger.error(f"Error en recorrer el Excel: {e}")
+        print(f"Error en recorrer el Excel: {e}", flush=True)
 
     try:
         with open(archivo_path, "a") as archivoActuaciones:
@@ -89,17 +86,17 @@ def recorrerElExcel():
             archivoActuaciones.write(f"# REGISTROS ESCANEADOS: {fila - 1} DE: {n_filas}\n")
             archivoActuaciones.write("######################################\n")
             archivoActuaciones.flush()
-            logger.info(f"Información añadida al archivo {archivo_path}.")
+            print(f"Información añadida al archivo {archivo_path}.", flush=True)
     except Exception as e:
-        logger.error(f"Error escribiendo en el archivo de información: {e}")
+        print(f"Error escribiendo en el archivo de información: {e}", flush=True)
 
 
 def revisarActuaciones(numeroDeProceso):
-    logger.info(f"Revisando actuaciones para el proceso: {numeroDeProceso}")
+    print(f"Revisando actuaciones para el proceso: {numeroDeProceso}", flush=True)
 
     fechaHoy = obtenerFechaDeHoy()
     if fechaHoy is None:
-        logger.error("No se pudo obtener la fecha de hoy. Saliendo de la función.")
+        print("No se pudo obtener la fecha de hoy. Saliendo de la función.", flush=True)
         return
 
     options = webdriver.ChromeOptions()
@@ -115,14 +112,14 @@ def revisarActuaciones(numeroDeProceso):
             time.sleep(5)
             driver.get("https://consultaprocesos.ramajudicial.gov.co/Procesos/NumeroRadicacion")
             time.sleep(1)
-            logger.info("Página cargada exitosamente.")
+            print("Página cargada exitosamente.", flush=True)
             break
         except Exception as e:
-            logger.error(f"Error al cargar la página: {e}. Reintentando...")
+            print(f"Error al cargar la página: {e}. Reintentando...", flush=True)
             driver.refresh()
             time.sleep(300)
             if not driver.window_handles:
-                logger.info("Se detuvo el escaneo de registros manualmente.")
+                print("Se detuvo el escaneo de registros manualmente.", flush=True)
                 break
 
     try:
@@ -137,7 +134,7 @@ def revisarActuaciones(numeroDeProceso):
         )
         time.sleep(1)
         element.send_keys(numeroDeProceso)
-        logger.info(f"Número de radicación ingresado: {element.get_attribute('value')}")
+        print(f"Número de radicación ingresado: {element.get_attribute('value')}", flush=True)
 
         span_consultar = WebDriverWait(driver, 60).until(
             EC.presence_of_element_located((By.XPATH, "//span[text()='Consultar']"))
@@ -151,9 +148,9 @@ def revisarActuaciones(numeroDeProceso):
             )
             if boton_volver:
                 boton_volver.click()
-                logger.info("Botón 'Volver' encontrado y clickeado.")
+                print("Botón 'Volver' encontrado y clickeado.", flush=True)
         except TimeoutException:
-            logger.info("No hay span 'Volver'.")
+            print("No hay span 'Volver'.", flush=True)
             pass
 
         tablas = WebDriverWait(driver, 40).until(
@@ -171,13 +168,13 @@ def revisarActuaciones(numeroDeProceso):
                         fechaTemporalComprar = fechaHoy - timedelta(days=i)
                         fechaTemporalComprar = fechaTemporalComprar.strftime("%Y-%m-%d")
                         if fechaInicialStr == fechaTemporalComprar:
-                            logger.info(f"Fecha encontrada en el rango: {fechaInicialStr}")
+                            print(f"Fecha encontrada en el rango: {fechaInicialStr}", flush=True)
                             botonFecha.click()
                             break
                     else:
-                        logger.info(f"Fecha {fechaInicialStr} no está en el rango de búsqueda.")
+                        print(f"Fecha {fechaInicialStr} no está en el rango de búsqueda.", flush=True)
     except Exception as e:
-        logger.error(f"Error en la búsqueda de tabla: {e}")
+        print(f"Error en la búsqueda de tabla: {e}", flush=True)
         pass
 
     try:
@@ -207,9 +204,9 @@ def revisarActuaciones(numeroDeProceso):
                             archivoActuaciones.write(f"Anotacion: {anotacionObtenida}\n")
                             archivoActuaciones.write(
                                 "-----------------------------------------------------------------\n")
-                        logger.info(f"Información guardada para la fecha: {fechaObtenida_str}")
+                        print(f"Información guardada para la fecha: {fechaObtenida_str}", flush=True)
     except Exception as e:
-        logger.error(f"No se realizó la búsqueda de actuaciones: {e}")
+        print(f"No se realizó la búsqueda de actuaciones: {e}", flush=True)
         pass
     finally:
         driver.quit()
@@ -243,7 +240,7 @@ def enviarArchivoCorreo():
 
     smtp.sendmail(correo_emisor, correo_receptor, mensaje.as_string())
     smtp.quit()
-    logger.info("Correo enviado exitosamente.")
+    print("Correo enviado exitosamente.", flush=True)
 
 
 def main():
@@ -258,7 +255,7 @@ def main():
         enviarArchivoCorreo()
 
     except Exception as e:
-        logger.error(f"Error en el main: {e}")
+        print(f"Error en el main: {e}", flush=True)
 
 
 if __name__ == "__main__":
