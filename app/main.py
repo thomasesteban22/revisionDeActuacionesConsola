@@ -41,7 +41,7 @@ def run_scheduler():
         print_current_time()
         colombia_tz = pytz.timezone('America/Bogota')
         current_time = datetime.now(colombia_tz)
-        if current_time.hour == 19 and current_time.minute == 5:
+        if current_time.hour == 19 and current_time.minute == 7:
             scheduled_task()
         time.sleep(25)  # Sleep for 25 seconds
 
