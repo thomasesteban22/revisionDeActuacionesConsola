@@ -22,17 +22,27 @@ def print_current_time():
 def scheduled_task():
     logger.info("Ejecutando la tarea programada...")
     try:
-        result = subprocess.run(
+        process = subprocess.Popen(
             ["python", "-u", "/app/src/main2.py"],
-            capture_output=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
             text=True
         )
-        # Log the stdout and stderr from main2.py
-        logger.info(f"Subproceso stdout: {result.stdout}")
-        logger.error(f"Subproceso stderr: {result.stderr}")
+
+        # Lee stdout y stderr en tiempo real
+        for stdout_line in iter(process.stdout.readline, ""):
+            logger.info(stdout_line.strip())
+        for stderr_line in iter(process.stderr.readline, ""):
+            logger.error(stderr_line.strip())
+
+        process.stdout.close()
+        process.stderr.close()
+        process.wait()
         logger.info("Subproceso ejecutado correctamente")
+
     except Exception as e:
         logger.error(f"Error al ejecutar el subproceso: {e}")
+
     logger.info("Tarea programada completada.")
 
 
@@ -41,7 +51,7 @@ def run_scheduler():
         print_current_time()
         colombia_tz = pytz.timezone('America/Bogota')
         current_time = datetime.now(colombia_tz)
-        if current_time.hour == 19 and current_time.minute == 7:
+        if current_time.hour == 19 and current_time.minute == 11:
             scheduled_task()
         time.sleep(25)  # Sleep for 25 seconds
 
