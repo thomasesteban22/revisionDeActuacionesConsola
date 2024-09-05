@@ -20,7 +20,7 @@ import openpyxl
 logging.basicConfig(level=logging.INFO, format='%(asctime)s [%(levelname)s] %(message)s')
 logger = logging.getLogger(__name__)
 
-diasDeBusqueda = 5
+diasDeBusqueda = 3
 
 # Ruta al controlador msedgedriver.exe
 service = Service(executable_path='/usr/bin/chromedriver')  # Ruta común en Linux
