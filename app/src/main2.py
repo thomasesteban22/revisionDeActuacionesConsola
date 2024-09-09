@@ -34,7 +34,7 @@ INFORMACION_PATH = os.getenv(f"INFORMACION_PATH_{ENVIRONMENT.upper()}")
 logging.basicConfig(level=logging.INFO, format='%(asctime)s [%(levelname)s] %(message)s')
 logger = logging.getLogger(__name__)
 
-diasDeBusqueda = 5
+diasDeBusqueda = 2
 
 # Ruta al controlador msedgedriver.exe
 service = Service(executable_path=CHROMEDRIVER_PATH)
