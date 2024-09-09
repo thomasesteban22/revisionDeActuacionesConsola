@@ -34,7 +34,7 @@ INFORMACION_PATH = os.getenv(f"INFORMACION_PATH_{ENVIRONMENT.upper()}")
 logging.basicConfig(level=logging.INFO, format='%(asctime)s [%(levelname)s] %(message)s')
 logger = logging.getLogger(__name__)
 
-diasDeBusqueda = 3
+diasDeBusqueda = 5
 
 # Ruta al controlador msedgedriver.exe
 service = Service(executable_path=CHROMEDRIVER_PATH)
@@ -139,9 +139,7 @@ def revisarActuaciones(numeroDeProceso, fechaHoy):
 
     while True:
         try:
-            time.sleep(1)
             driver.get("https://consultaprocesos.ramajudicial.gov.co/Procesos/NumeroRadicacion")
-            time.sleep(1)
             print("Página cargada exitosamente.", flush=True)
             break
         except Exception as e:
@@ -164,7 +162,6 @@ def revisarActuaciones(numeroDeProceso, fechaHoy):
             )
         )
         resaltar_elemento(driver, element)
-        time.sleep(1)
         element.send_keys(numeroDeProceso)
         print(f"Número de radicación ingresado: {element.get_attribute('value')}", flush=True)
 
