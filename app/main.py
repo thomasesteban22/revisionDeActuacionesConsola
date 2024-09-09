@@ -45,13 +45,18 @@ def scheduled_task():
 
     logger.info("Tarea programada completada")
 
+    # Agregar un sleep de 22 horas después de ejecutar el subproceso
+    logger.info("Durmiendo por 22 horas...")
+    time.sleep(22 * 60 * 60)  # 22 horas en segundos
+    logger.info("Finalizó el periodo de sleep de 22 horas.")
+
 
 def run_scheduler():
     while True:
         print_current_time()
         colombia_tz = pytz.timezone('America/Bogota')
         current_time = datetime.now(colombia_tz)
-        if current_time.hour == 16 and current_time.minute == 30:
+        if current_time.hour == 23 and current_time.minute == 30:
             scheduled_task()
         time.sleep(25)  # Sleep for 25 seconds
 

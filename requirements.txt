@@ -101,3 +101,4 @@ zope.event==5.0
 zope.interface==6.1
 app~=0.0.1
 apscheduler==3.8.1
+python-dotenv~=1.0.1

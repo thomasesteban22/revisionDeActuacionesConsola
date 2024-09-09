@@ -15,6 +15,20 @@ from email.mime.application import MIMEApplication
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 import openpyxl
+from dotenv import load_dotenv
+from trio import sleep
+
+# Cargar variables del .env
+load_dotenv()
+
+# Obtener entorno
+ENVIRONMENT = os.getenv("ENVIRONMENT", "production")
+
+# Definir rutas según el entorno
+CHROMEDRIVER_PATH = os.getenv(f"CHROMEDRIVER_PATH_{ENVIRONMENT.upper()}")
+DATA_PATH = os.getenv(f"DATA_PATH_{ENVIRONMENT.upper()}")
+EXCEL_PATH = os.getenv(f"EXCEL_PATH_{ENVIRONMENT.upper()}")
+INFORMACION_PATH = os.getenv(f"INFORMACION_PATH_{ENVIRONMENT.upper()}")
 
 # Configuración de logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s [%(levelname)s] %(message)s')
@@ -23,13 +37,16 @@ logger = logging.getLogger(__name__)
 diasDeBusqueda = 3
 
 # Ruta al controlador msedgedriver.exe
-service = Service(executable_path='/usr/bin/chromedriver')  # Ruta común en Linux
+service = Service(executable_path=CHROMEDRIVER_PATH)
 
 
-def guardadoDeLogs(fInicio, fFinal, numRegistrosEscaneados):
-    logger.info("Fecha Inicio: %s", fInicio.strftime("%d/%m/%Y %H:%M:%S"))
-    logger.info("Fecha Final: %s", fFinal.strftime("%d/%m/%Y %H:%M:%S"))
-    logger.info("Registros Escaneados: %d", numRegistrosEscaneados)
+def resaltar_elemento(driver, elemento):
+    """Función para resaltar un elemento cambiando su fondo a amarillo"""
+    driver.execute_script("arguments[0].style.backgroundColor = 'yellow'", elemento)
+
+
+def resaltar_elemento_rojo(driver, elemento):
+    driver.execute_script("arguments[0].style.backgroundColor = 'red'", elemento)
 
 
 def obtenerFechaDeHoy():
@@ -42,15 +59,15 @@ def obtenerFechaDeHoy():
         return None
 
 
-def recorrerElExcel():
+def recorrerElExcel(fechaHoy):
     try:
-        if not os.path.exists("/app/data"):
+        if not os.path.exists(os.path.dirname(DATA_PATH)):
             print("El directorio /app/data no existe.", flush=True)
             return
 
-        archivo_path = "/app/data/informacion.txt"
+        archivo_path = INFORMACION_PATH
         try:
-            with open(archivo_path, "a") as archivoActuaciones:
+            with open(archivo_path, "w") as archivoActuaciones:
                 archivoActuaciones.write("\n")
                 archivoActuaciones.flush()
                 print(f"Archivo {archivo_path} abierto y limpiado correctamente.", flush=True)
@@ -58,7 +75,7 @@ def recorrerElExcel():
             print(f"No se pudo abrir o escribir en el archivo {archivo_path}: {e}", flush=True)
             return
 
-        wb = openpyxl.load_workbook("/app/src/FOLDERESBASENUEVA.xlsm")
+        wb = openpyxl.load_workbook(EXCEL_PATH)
         ws = wb["CONSULTA UNIFICADA DE PROCESOS"]
         print("Archivo Excel abierto correctamente.", flush=True)
     except Exception as e:
@@ -75,7 +92,7 @@ def recorrerElExcel():
             if valor is None or valor == "":
                 continue
             else:
-                revisarActuaciones(numeroDeProceso)
+                revisarActuaciones(numeroDeProceso, fechaHoy)
     except Exception as e:
         print(f"Error en recorrer el Excel: {e}", flush=True)
 
@@ -83,7 +100,7 @@ def recorrerElExcel():
         with open(archivo_path, "a") as archivoActuaciones:
             archivoActuaciones.write("\n")
             archivoActuaciones.write("######################################\n")
-            archivoActuaciones.write(f"# REGISTROS ESCANEADOS: {fila - 1} DE: {n_filas}\n")
+            archivoActuaciones.write(f"# REGISTROS ESCANEADOS: {fila-1} DE: {n_filas-1}\n")
             archivoActuaciones.write("######################################\n")
             archivoActuaciones.flush()
             print(f"Información añadida al archivo {archivo_path}.", flush=True)
@@ -91,25 +108,38 @@ def recorrerElExcel():
         print(f"Error escribiendo en el archivo de información: {e}", flush=True)
 
 
-def revisarActuaciones(numeroDeProceso):
-    print(f"Revisando actuaciones para el proceso: {numeroDeProceso}", flush=True)
+def esperarHastaQueNoHayaError(driver):
+    while True:
+        try:
+            error_element = WebDriverWait(driver, 2).until(
+                EC.presence_of_element_located((By.XPATH, "//p[text()='Error: Network Error']"))
+            )
+            if error_element:
+                print("Error de red detectado. Reintentando en 10 minutos...", flush=True)
+                time.sleep(600)
+                driver.refresh()
+            else:
+                print("No hay error de red. Continuando con el flujo.", flush=True)
+                break
+        except TimeoutException:
+            print("No se encontró el texto 'Error: Network Error'. Continuando con el flujo.",
+                  flush=True)
+            break
 
-    fechaHoy = obtenerFechaDeHoy()
-    if fechaHoy is None:
-        print("No se pudo obtener la fecha de hoy. Saliendo de la función.", flush=True)
-        return
+
+def revisarActuaciones(numeroDeProceso, fechaHoy):
 
     options = webdriver.ChromeOptions()
-    options.add_argument('--headless')
-    options.add_argument('--disable-gpu')
-    options.add_argument('--no-sandbox')
-    options.add_argument('--disable-dev-shm-usage')
+    options.add_argument('--headless')  # Activar el modo headless
+    options.add_argument('--disable-gpu')  # Necesario para algunos sistemas
+    options.add_argument('--no-sandbox')  # Previene errores en ciertos entornos
+    options.add_argument('--disable-dev-shm-usage')  # Mejora la estabilidad en entornos con poca memoria compartida
 
     driver = webdriver.Chrome(service=service, options=options)
 
     while True:
         try:
-            time.sleep(5)
+            time.sleep(1)
             driver.get("https://consultaprocesos.ramajudicial.gov.co/Procesos/NumeroRadicacion")
             time.sleep(1)
             print("Página cargada exitosamente.", flush=True)
@@ -125,6 +155,7 @@ def revisarActuaciones(numeroDeProceso):
     try:
         div_elements = driver.find_elements(By.CSS_SELECTOR, "div.v-input--selection-controls__input")
         second_div_element = div_elements[2]
+        resaltar_elemento(driver, second_div_element)
         second_div_element.click()
 
         element = WebDriverWait(driver, 60).until(
@@ -132,6 +163,7 @@ def revisarActuaciones(numeroDeProceso):
                 (By.XPATH, "//input[@placeholder='Ingrese los 23 dígitos del número de Radicación']")
             )
         )
+        resaltar_elemento(driver, element)
         time.sleep(1)
         element.send_keys(numeroDeProceso)
         print(f"Número de radicación ingresado: {element.get_attribute('value')}", flush=True)
@@ -139,6 +171,7 @@ def revisarActuaciones(numeroDeProceso):
         span_consultar = WebDriverWait(driver, 60).until(
             EC.presence_of_element_located((By.XPATH, "//span[text()='Consultar']"))
         )
+        resaltar_elemento(driver, span_consultar)
         time.sleep(1)
         span_consultar.click()
 
@@ -147,68 +180,113 @@ def revisarActuaciones(numeroDeProceso):
                 EC.presence_of_element_located((By.XPATH, "//span[text()=' Volver ']"))
             )
             if boton_volver:
+                esperarHastaQueNoHayaError(driver)
+                resaltar_elemento(driver, boton_volver)
                 boton_volver.click()
                 print("Botón 'Volver' encontrado y clickeado.", flush=True)
+
         except TimeoutException:
             print("No hay span 'Volver'.", flush=True)
             pass
 
-        tablas = WebDriverWait(driver, 40).until(
-            EC.presence_of_all_elements_located((By.TAG_NAME, "table"))
-        )
-        resTablaFechaAC = tablas[0]
-        for fila in resTablaFechaAC.find_elements(By.TAG_NAME, "tr"):
-            if len(fila.find_elements(By.TAG_NAME, "td")) > 0:
-                celdaFecha = fila.find_elements(By.TAG_NAME, "td")[2]
-                botonFecha = celdaFecha.find_element(By.TAG_NAME, "button")
-                if botonFecha:
-                    fechaInicialComparar = date.fromisoformat(botonFecha.text)
-                    fechaInicialStr = fechaInicialComparar.strftime("%Y-%m-%d")
-                    for i in range(0, diasDeBusqueda):
-                        fechaTemporalComprar = fechaHoy - timedelta(days=i)
-                        fechaTemporalComprar = fechaTemporalComprar.strftime("%Y-%m-%d")
-                        if fechaInicialStr == fechaTemporalComprar:
-                            print(f"Fecha encontrada en el rango: {fechaInicialStr}", flush=True)
-                            botonFecha.click()
-                            break
-                    else:
-                        print(f"Fecha {fechaInicialStr} no está en el rango de búsqueda.", flush=True)
+        try:
+            tablas = WebDriverWait(driver, 40).until(
+                EC.presence_of_all_elements_located((By.TAG_NAME, "table"))
+            )
+
+            resTablaFechaAC = tablas[0]
+            filas = resTablaFechaAC.find_elements(By.TAG_NAME, "tr")
+
+            for fila in filas:
+                celdas = fila.find_elements(By.TAG_NAME, "td")
+                if len(celdas) > 0:
+                    resaltar_elemento_rojo(driver, fila)
+
+                    try:
+                        boton = celdas[2].find_element(By.TAG_NAME, "button")
+                        resaltar_elemento(driver, boton)
+
+                        fecha_boton_texto = boton.text.strip()
+                        fecha_boton = date.fromisoformat(fecha_boton_texto)
+
+                        for i in range(0, diasDeBusqueda):
+                            fecha_comparacion = fechaHoy - timedelta(days=i)
+                            fecha_comparacion_str = fecha_comparacion.strftime("%Y-%m-%d")
+                            if fecha_boton_texto == fecha_comparacion_str:
+                                print(f"Fecha {fecha_boton_texto} encontrada en el rango.", flush=True)
+                                boton.click()
+                                break
+                        else:
+                            print(f"Fecha {fecha_boton_texto} no está en el rango de búsqueda.", flush=True)
+
+                    except Exception as e:
+                        print(f"No se encontró el botón en esta fila", flush=True)
+
+        except Exception as e:
+            print(f"Error en el recorrido de la tabla o búsqueda del botón: {e}", flush=True)
+
     except Exception as e:
         print(f"Error en la búsqueda de tabla: {e}", flush=True)
         pass
 
     try:
+
         tablas = WebDriverWait(driver, 60).until(
+
             EC.presence_of_all_elements_located((By.TAG_NAME, "table"))
+
         )
+
         time.sleep(1)
+
         tabla_actuaciones = tablas[1]
 
         for fila in tabla_actuaciones.find_elements(By.TAG_NAME, "tr"):
+
             if len(fila.find_elements(By.TAG_NAME, "td")) > 0:
+
                 celdaFecha = fila.find_elements(By.TAG_NAME, "td")[0]
+
                 fechaObtenida = date.fromisoformat(celdaFecha.text)
+
                 actuacionObtenida = fila.find_elements(By.TAG_NAME, "td")[1].text
+
                 anotacionObtenida = fila.find_elements(By.TAG_NAME, "td")[2].text
+
                 fechaObtenida_str = fechaObtenida.strftime("%Y-%m-%d")
 
                 for i in range(0, diasDeBusqueda):
+
                     fecha_comparacion = fechaHoy - timedelta(days=i)
+
                     fecha_comparacion = fecha_comparacion.strftime("%Y-%m-%d")
+
                     if fechaObtenida_str == fecha_comparacion:
-                        with open("/app/data/informacion.txt", "a") as archivoActuaciones:
+                        with open(INFORMACION_PATH, "a") as archivoActuaciones:
                             archivoActuaciones.write("\n")
+
                             archivoActuaciones.write(f"NUMERO DEL PROCESO: {numeroDeProceso}\n")
+
                             archivoActuaciones.write(f"Fecha: {fechaObtenida_str}\n")
+
                             archivoActuaciones.write(f"Actuacion: {actuacionObtenida}\n")
+
                             archivoActuaciones.write(f"Anotacion: {anotacionObtenida}\n")
+
                             archivoActuaciones.write(
+
                                 "-----------------------------------------------------------------\n")
+
                         print(f"Información guardada para la fecha: {fechaObtenida_str}", flush=True)
+
     except Exception as e:
-        print(f"No se realizó la búsqueda de actuaciones: {e}", flush=True)
+
+        print(f"No se realizó la búsqueda de actuaciones", flush=True)
+
         pass
+
     finally:
+
         driver.quit()
 
 
@@ -221,7 +299,7 @@ def enviarArchivoCorreo():
     correo_receptor = "registroautomaticoactuaciones@gmail.com"
     asunto = "Registro escaneo de documento desde el servidor"
 
-    archivo_adjuntar = "/app/data/informacion.txt"
+    archivo_adjuntar = INFORMACION_PATH
 
     smtp.login(correo_emisor, "lctc zggr fztd eokc")
 
@@ -230,7 +308,7 @@ def enviarArchivoCorreo():
     mensaje["From"] = correo_emisor
     mensaje["To"] = correo_receptor
 
-    cuerpo = f"Correo Auto-Registros de {fechaHoyStr}\n"
+    cuerpo = f"Escaneo de actuaciones\n"
     mensaje.attach(MIMEText(cuerpo))
 
     with open(archivo_adjuntar, "rb") as archivo:
@@ -246,11 +324,8 @@ def enviarArchivoCorreo():
 def main():
     try:
         fechaHoy = obtenerFechaDeHoy()
-        fechaFinal = fechaHoy
 
-        recorrerElExcel()
-
-        guardadoDeLogs(fechaHoy, fechaFinal, 10)
+        recorrerElExcel(fechaHoy)
 
         enviarArchivoCorreo()
 
