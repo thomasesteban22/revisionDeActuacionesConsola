@@ -46,9 +46,9 @@ def scheduled_task():
     logger.info("Tarea programada completada")
 
     # Agregar un sleep de 22 horas después de ejecutar el subproceso
-    logger.info("Durmiendo por 22 horas...")
-    time.sleep(22 * 60 * 60)  # 22 horas en segundos
-    logger.info("Finalizó el periodo de sleep de 22 horas.")
+    logger.info("Durmiendo por 20 horas...")
+    time.sleep(20 * 60 * 60)  # 22 horas en segundos
+    logger.info("Finalizó el periodo de sleep de 20 horas.")
 
 
 def run_scheduler():
